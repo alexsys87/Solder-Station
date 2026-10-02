@@ -456,13 +456,18 @@ Settings
 
 ### IAR EWARM (основной вариант)
 
-1. Откройте `EWARM/SolderStation.eww` (EWARM 8.x / 9.x).
+1. Откройте `EWARM/SolderStation.eww` в **EWARM 9.70** или новее (формат проекта 4).
 2. Конфигурация **Debug** (оптимизация low) или **Release** (high, size).
-3. `Project → Make` (F7), прошивка и отладка — `Download and Debug` (Ctrl+D) через **ST-Link (SWD)**.
+3. `Project → Make` (F7), прошивка и отладка — `Download and Debug` (Ctrl+D).
+   Отладчик по умолчанию — **J-Link** (SWD). Для ST-Link: `Options → Debugger → Setup → Driver: ST-LINK`.
 4. Результат: `EWARM/<cfg>/Exe/SolderStation.out` и `SolderStation.hex`.
 
-Проект сгенерирован скриптом `tools/gen_iar.py` (перезапустите его после добавления/удаления файлов).
-Если ваша версия IAR открыла проект с неверными опциями — проверьте/выставьте вручную:
+Файлы проекта генерирует скрипт `tools/gen_iar.py` из шаблонов `tools/iar_template/`, сохранённых
+EWARM 9.70: из шаблона берутся все опции, подставляются только define, пути include, уровень оптимизации
+и список файлов. После добавления/удаления исходников запустите `python3 tools/gen_iar.py`.
+Если у вас другая версия EWARM — сохраните в ней любой проект для STM32F401CC, положите его
+`.ewp/.ewd/.ewt/.eww` в `tools/iar_template/` (как `template.*`) и перезапустите скрипт.
+Проверить или выставить опции вручную можно по таблице:
 
 | Раздел Options | Значение |
 |---|---|
@@ -472,7 +477,7 @@ Settings
 | C/C++ Compiler → Preprocessor → Include directories | `$PROJ_DIR$\..\Core\Inc`, `$PROJ_DIR$\..\Drivers\CMSIS\Include`, `$PROJ_DIR$\..\Drivers\CMSIS\Device\ST\STM32F4xx\Include` |
 | Linker → Config → Linker configuration file | `$PROJ_DIR$\stm32f401xc_flash.icf` |
 | Output Converter | Intel extended HEX |
-| Debugger → Setup → Driver | ST-LINK; Download → Use flash loader(s) |
+| Debugger → Setup → Driver | J-Link или ST-LINK; Download → Use flash loader(s) |
 | Файлы | все `Core/Src/*.c` + `EWARM/startup_stm32f401xc.s` |
 
 Для **STM32F401CE**: Device = STM32F401CE, символ `STM32F401xE`, в ICF конец ROM `0x0807FFFF`, RAM `0x20017FFF`.
@@ -654,6 +659,9 @@ OK
   переход в режим обновления прошивки (DFU).
 - **Консоль** протокола с журналом обмена (поток `!S` можно скрыть).
 - **Две темы** — светлая и тёмная, переключаются на лету; выбор, порт и размер окна запоминаются.
+- **Язык интерфейса** — русский или английский (выпадающий список в заголовке окна), переключается
+  на лету; при первом запуске выбирается по языку Windows. Строки лежат в `Lang/ru.xaml` и
+  `Lang/en.xaml` — для нового языка достаточно добавить ещё один такой словарь и строку в `Loc.Languages`.
 
 Структура проекта:
 
@@ -661,11 +669,12 @@ OK
 PC/SolderStation.App
 ├── Models/         StationStatus, TipData, ParamCatalog (русские названия и группы), SettingsFile (JSON)
 ├── Services/       StationClient (порт + протокол), PortScanner (WMI), SettingsTransfer (импорт/экспорт/бэкап),
-│                   ThemeManager, AppSettingsStore, Dialogs
+│                   ThemeManager, Loc (язык), AppSettingsStore, Dialogs
 ├── ViewModels/     MainViewModel (+ .Live, .Params, .Tips, .Service), ParamViewModel, TipViewModel,
 │                   CalibrationViewModel
 ├── Views/          MainWindow, CalibrationWindow
 ├── Themes/         Light.xaml, Dark.xaml (цвета), Styles.xaml (стили контролов)
+├── Lang/           ru.xaml, en.xaml — строки интерфейса (Services/Loc.cs переключает язык)
 └── Behaviors/, Converters/, Assets/
 ```
 

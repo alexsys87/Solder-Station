@@ -14,7 +14,7 @@ public sealed partial class StationClient
         var data = await QueryAsync("PING", timeoutMs).ConfigureAwait(false);
         var line = data.FirstOrDefault() ?? "";
         if (!line.StartsWith("T12STATION", StringComparison.Ordinal))
-            throw new StationException(0, "Неизвестное устройство");
+            throw new StationException(0, Loc.T("X.UnknownDevice"));
         return KeyValueParser.Parse(line).GetValueOrDefault("fw", "?");
     }
 

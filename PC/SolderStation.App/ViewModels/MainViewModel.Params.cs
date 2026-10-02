@@ -12,9 +12,12 @@ public sealed partial class MainViewModel
 
     private readonly Dictionary<string, ParamViewModel> _params = new(StringComparer.OrdinalIgnoreCase);
 
+    private IReadOnlyList<ParamValue> _lastParams = Array.Empty<ParamValue>();
+
     private async Task LoadParamsAsync()
     {
         var values = await _client.GetParamsAsync();
+        _lastParams = values;
 
         // same set of keys: just refresh the values (keeps scroll position)
         if (_params.Count == values.Count && values.All(v => _params.ContainsKey(v.Key)))
@@ -23,23 +26,33 @@ public sealed partial class MainViewModel
         }
         else
         {
-            _params.Clear();
-            ParamGroups.Clear();
-            var items = values
-                .Select(v => new ParamViewModel(ParamCatalog.Get(v.Key), v, SendParamAsync))
-                .ToList();
-            foreach (var p in items) _params[p.Key] = p;
-
-            foreach (var group in ParamCatalog.GroupOrder)
-            {
-                var inGroup = items.Where(p => p.Def.Group == group)
-                                   .OrderBy(p => ParamCatalog.Order(p.Key))
-                                   .ToList();
-                if (inGroup.Count > 0) ParamGroups.Add(new ParamGroupViewModel(group, inGroup));
-            }
+            BuildParamGroups(values);
         }
         UpdateSetpointLimits();
     }
+
+    /// <summary>Creates the settings page (also after a language switch).</summary>
+    private void BuildParamGroups(IReadOnlyList<ParamValue> values)
+    {
+        _params.Clear();
+        ParamGroups.Clear();
+        var items = values
+            .Select(v => new ParamViewModel(ParamCatalog.Get(v.Key), v, SendParamAsync))
+            .ToList();
+        foreach (var p in items) _params[p.Key] = p;
+
+        foreach (var group in ParamCatalog.GroupOrder)
+        {
+            var inGroup = items.Where(p => p.Def.Group == group)
+                               .OrderBy(p => ParamCatalog.Order(p.Key))
+                               .ToList();
+            if (inGroup.Count > 0) ParamGroups.Add(new ParamGroupViewModel(Loc.T(group), inGroup));
+        }
+    }
+
+    /// <summary>Current values in raw units (for the rebuild after a language switch).</summary>
+    private IReadOnlyList<ParamValue> CurrentParamValues() =>
+        _lastParams.Select(v => _params.TryGetValue(v.Key, out var p) ? v with { Value = p.RawValue } : v).ToList();
 
     private void UpdateSetpointLimits()
     {
@@ -53,12 +66,12 @@ public sealed partial class MainViewModel
         try
         {
             await _client.SetParamAsync(p.Key, p.RawValue);
-            StatusMessage = $"{p.Title}: {p.DisplayText} (сохранится автоматически)";
+            StatusMessage = Loc.F("M.ParamSent", p.Title, p.DisplayText);
             if (p.Key is "temp_min" or "temp_max") UpdateSetpointLimits();
         }
         catch (Exception ex)
         {
-            StatusMessage = $"{p.Title}: {ex.Message}";
+            StatusMessage = Loc.F("M.ParamError", p.Title, ex.Message);
             // show what the station really has
             try
             {
@@ -77,20 +90,19 @@ public sealed partial class MainViewModel
     }
 
     [RelayCommand]
-    private Task ReloadParams() => RunAsync(ReloadSettingsAsync, "Чтение настроек…");
+    private Task ReloadParams() => RunAsync(ReloadSettingsAsync, Loc.T("M.Reading"));
 
     [RelayCommand]
     private Task SaveToFlash() => RunAsync(async () =>
     {
         await _client.SaveAsync();
-        StatusMessage = "Настройки записаны во флеш станции";
-    }, "Сохранение…");
+        StatusMessage = Loc.T("M.SavedFlash");
+    }, Loc.T("M.Saving"));
 
     [RelayCommand]
     private Task FactoryDefaults()
     {
-        if (!Dialogs.Confirm("Сбросить все настройки и профили жал станции к заводским?\n" +
-                             "Перед этим будет предложено сохранить резервную копию."))
+        if (!Dialogs.Confirm(Loc.T("M.ConfirmFactory")))
             return Task.CompletedTask;
 
         return RunAsync(async () =>
@@ -102,7 +114,7 @@ public sealed partial class MainViewModel
             await _client.DefaultsAsync();
             await _client.SaveAsync();
             await ReloadSettingsAsync();
-            StatusMessage = "Заводские настройки восстановлены";
-        }, "Сброс настроек…");
+            StatusMessage = Loc.T("M.FactoryDone");
+        }, Loc.T("M.FactoryBusy"));
     }
 }

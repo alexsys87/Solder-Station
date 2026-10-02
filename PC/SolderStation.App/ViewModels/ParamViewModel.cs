@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SolderStation.Models;
+using SolderStation.Services;
 
 namespace SolderStation.ViewModels;
 
@@ -26,7 +27,7 @@ public sealed partial class ParamViewModel : ObservableObject
         _scale = Math.Pow(10, def.Decimals);
         RawMin = value.Min;
         RawMax = value.Max;
-        if (def.Options != null) Options = new ReadOnlyCollection<string>(def.Options);
+        Options = new ReadOnlyCollection<string>(def.Options.ToList());
         SetFromDevice(value.Value);
     }
 
@@ -35,14 +36,14 @@ public sealed partial class ParamViewModel : ObservableObject
     public string Title => Def.Title;
     public string Unit => Def.Unit;
     public string Hint => Def.ZeroText != null
-        ? (string.IsNullOrEmpty(Def.Hint) ? $"0 = {Def.ZeroText}" : $"{Def.Hint}. 0 = {Def.ZeroText}")
+        ? (string.IsNullOrEmpty(Def.Hint) ? Loc.F("M.ZeroOnly", Def.ZeroText) : Loc.F("M.HintZero", Def.Hint, Def.ZeroText))
         : Def.Hint;
     public bool HasHint => !string.IsNullOrEmpty(Hint);
 
     public bool IsNumber => Def.Kind == ParamKind.Number;
     public bool IsBool => Def.Kind == ParamKind.Bool;
     public bool IsChoice => Def.Kind == ParamKind.Choice;
-    public IReadOnlyList<string> Options { get; } = Array.Empty<string>();
+    public IReadOnlyList<string> Options { get; }
 
     public int RawMin { get; }
     public int RawMax { get; }
@@ -79,7 +80,7 @@ public sealed partial class ParamViewModel : ObservableObject
         get
         {
             if (Def.ZeroText != null && RawValue == 0) return "0";
-            return Value.ToString("F" + Def.Decimals, CultureInfo.CurrentCulture);
+            return Value.ToString("F" + Def.Decimals, Loc.Culture);
         }
         set
         {
@@ -94,7 +95,7 @@ public sealed partial class ParamViewModel : ObservableObject
 
     public string DisplayText => Def.ZeroText != null && RawValue == 0
         ? Def.ZeroText
-        : $"{Value.ToString("F" + Def.Decimals, CultureInfo.CurrentCulture)} {Unit}".Trim();
+        : $"{Value.ToString("F" + Def.Decimals, Loc.Culture)} {Unit}".Trim();
 
     partial void OnValueChanged(double value)
     {

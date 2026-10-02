@@ -4,6 +4,8 @@ namespace SolderStation.Models;
 public sealed class AppSettings
 {
     public bool DarkTheme { get; set; }
+    /// <summary>"ru", "en" or null = language of the operating system.</summary>
+    public string? Language { get; set; }
     public string? LastPort { get; set; }
     public int BaudRate { get; set; } = 115200;
     public bool AutoConnect { get; set; } = true;

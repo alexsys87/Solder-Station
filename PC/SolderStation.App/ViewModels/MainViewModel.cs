@@ -27,6 +27,8 @@ public sealed partial class MainViewModel : ObservableObject
 
         BaudRate = _settings.BaudRate;
         IsDarkTheme = _settings.DarkTheme;
+        LanguageCode = Loc.Language;
+        Loc.Changed += OnLanguageChanged;
         AutoReconnect = _settings.AutoReconnect;
         AutoBackup = _settings.AutoBackup;
         Presets = new ObservableCollection<int>(_settings.Presets);
@@ -90,7 +92,7 @@ public sealed partial class MainViewModel : ObservableObject
     }
 
     [ObservableProperty] private bool _isBusy;
-    [ObservableProperty] private string _statusMessage = "Не подключено";
+    [ObservableProperty] private string _statusMessage = Loc.T("M.NotConnected");
     [ObservableProperty] private string _firmware = "";
     [ObservableProperty] private string _deviceId = "";
     [ObservableProperty] private string _deviceDetails = "";
@@ -102,6 +104,32 @@ public sealed partial class MainViewModel : ObservableObject
     {
         ThemeManager.Apply(value);
         _settings.DarkTheme = value;
+    }
+
+    // ------------------------------------------------------------------
+    // Language
+    // ------------------------------------------------------------------
+    public IReadOnlyList<Loc.LanguageInfo> Languages => Loc.Languages;
+
+    /// <summary>Selected UI language ("ru" / "en").</summary>
+    [ObservableProperty] private string _languageCode = "ru";
+
+    partial void OnLanguageCodeChanged(string value)
+    {
+        if (value == Loc.Language) return;
+        _settings.Language = value;
+        Loc.Apply(value);
+    }
+
+    /// <summary>Re-creates the texts produced in code for the new language.</summary>
+    private void OnLanguageChanged()
+    {
+        if (_lastParams.Count > 0) BuildParamGroups(CurrentParamValues());
+        if (_lastStatus != null) ApplyStatus(_lastStatus);
+        StatusMessage = IsConnected
+            ? Loc.F("M.Connected", _settings.LastPort ?? "", Firmware)
+            : Loc.T("M.NotConnected");
+        if (DeviceTime != "—") _ = RunAsync(ReadTimeAsync, null, quiet: true);
     }
 
     partial void OnAutoReconnectChanged(bool value) => _settings.AutoReconnect = value;
@@ -137,10 +165,10 @@ public sealed partial class MainViewModel : ObservableObject
     {
         if (SelectedPort == null)
         {
-            StatusMessage = "Выберите COM-порт";
+            StatusMessage = Loc.T("M.SelectPort");
             return;
         }
-        await RunAsync(() => OpenAsync(SelectedPort.Name, BaudRate), $"Подключение к {SelectedPort.Name}…");
+        await RunAsync(() => OpenAsync(SelectedPort.Name, BaudRate), Loc.F("M.Connecting", SelectedPort.Name));
     }
 
     [RelayCommand(CanExecute = nameof(CanDisconnect))]
@@ -151,7 +179,7 @@ public sealed partial class MainViewModel : ObservableObject
         try { await _client.StreamAsync(0); } catch { /* port may be gone */ }
         _client.Close();
         IsConnected = false;
-        StatusMessage = "Отключено";
+        StatusMessage = Loc.T("M.Disconnected");
     }
 
     /// <summary>Tries every port and stays connected to the first station found.</summary>
@@ -164,7 +192,7 @@ public sealed partial class MainViewModel : ObservableObject
         {
             foreach (var port in Ports.ToList())
             {
-                StatusMessage = $"Поиск: {port.Name}…";
+                StatusMessage = Loc.F("M.Searching", port.Name);
                 try
                 {
                     _client.Open(port.Name, BaudRate);
@@ -179,8 +207,8 @@ public sealed partial class MainViewModel : ObservableObject
                     _client.Close();
                 }
             }
-            StatusMessage = "Станция не найдена";
-        }, "Поиск станции…");
+            StatusMessage = Loc.T("M.NotFound");
+        }, Loc.T("M.SearchingStation"));
     }
 
     private async Task OpenAsync(string portName, int baud)
@@ -208,13 +236,13 @@ public sealed partial class MainViewModel : ObservableObject
 
             await ReloadAllAsync();
             await _client.StreamAsync(_settings.StreamIntervalMs);
-            StatusMessage = $"Подключено: {portName}, прошивка {Firmware}";
+            StatusMessage = Loc.F("M.Connected", portName, Firmware);
 
             if (AutoBackup)
             {
                 var file = await SettingsTransfer.ReadFromDeviceAsync(_client);
                 if (SettingsTransfer.Backup(file) is { } path)
-                    StatusMessage += $" · резервная копия: {Path.GetFileName(path)}";
+                    StatusMessage += Loc.F("M.BackupSaved", Path.GetFileName(path));
             }
         }
         catch
@@ -233,7 +261,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         _client.Close();
         IsConnected = false;
-        StatusMessage = "Соединение потеряно: " + reason;
+        StatusMessage = Loc.F("M.ConnectionLost", reason);
         if (AutoReconnect && !_userDisconnected) _reconnectTimer.Start();
     }
 
@@ -289,12 +317,12 @@ public sealed partial class MainViewModel : ObservableObject
         }
         catch (StationException ex)
         {
-            StatusMessage = "Станция ответила ошибкой: " + ex.Message;
+            StatusMessage = Loc.F("M.StationError", ex.Message);
             if (!quiet) Dialogs.Error(StatusMessage);
         }
         catch (Exception ex)
         {
-            StatusMessage = "Ошибка: " + ex.Message;
+            StatusMessage = Loc.F("M.Error", ex.Message);
             if (!quiet && busyText != null) Dialogs.Error(StatusMessage);
         }
         finally

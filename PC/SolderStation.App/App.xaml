@@ -9,6 +9,8 @@
                 <!-- index 0 is replaced by ThemeManager (Light / Dark) -->
                 <ResourceDictionary Source="Themes/Light.xaml"/>
                 <ResourceDictionary Source="Themes/Styles.xaml"/>
+                <!-- index 2 is replaced by Loc (ru / en) -->
+                <ResourceDictionary Source="Lang/ru.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>

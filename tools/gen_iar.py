@@ -1,189 +1,162 @@
 #!/usr/bin/env python3
 """
-Generates the IAR EWARM project (EWARM/SolderStation.ewp / .ewd / .eww)
-from the source tree. Run again after adding or removing source files.
+Generates the IAR EWARM project (EWARM/SolderStation.eww/.ewp/.ewd/.ewt).
+
+The files are produced from templates in tools/iar_template/ that were saved
+by IAR EWARM 9.70 (project format 4), so the project opens in that version
+and newer without conversion. Only the configuration names, output paths,
+preprocessor symbols, include paths, optimization level and the file list
+are replaced; every other option keeps the template value.
+
+Run again after adding or removing source files:
+    python3 tools/gen_iar.py
 """
 import glob
 import os
+import re
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-EW = os.path.join(ROOT, "EWARM")
+TPL = os.path.join(ROOT, "tools", "iar_template")
+OUT = os.path.join(ROOT, "EWARM")
 NAME = "SolderStation"
-DEVICE = "STM32F401CC\tST STM32F401CC"
+TPL_CONFIG = "BlackPill_F401"
 
 DEFINES = ["STM32F401xC", "HSE_VALUE=25000000"]
 INCLUDES = [r"$PROJ_DIR$\..\Core\Inc",
             r"$PROJ_DIR$\..\Drivers\CMSIS\Include",
             r"$PROJ_DIR$\..\Drivers\CMSIS\Device\ST\STM32F4xx\Include"]
 
-
-def opt(name, states, version=None):
-    if not isinstance(states, (list, tuple)):
-        states = [states]
-    s = "                <option>\n                    <name>%s</name>\n" % name
-    if version is not None:
-        s += "                    <version>%d</version>\n" % version
-    for st in states:
-        s += "                    <state>%s</state>\n" % st
-    s += "                </option>\n"
-    return s
+# name -> optimization level (0 none, 1 low, 2 medium, 3 high)
+CONFIGS = [("Debug", 1), ("Release", 3)]
 
 
-def settings(name, archive, version, options, debug):
-    return ("            <settings>\n"
-            "                <name>%s</name>\n"
-            "                <archiveVersion>%d</archiveVersion>\n"
-            "                <data>\n"
-            "                <version>%d</version>\n"
-            "                <wantNonLocal>1</wantNonLocal>\n"
-            "                <debug>%d</debug>\n%s"
-            "                </data>\n"
-            "            </settings>\n") % (name, archive, version, debug, options)
+def read(name):
+    with open(os.path.join(TPL, name), encoding="utf-8", newline="") as f:
+        return f.read().replace("\r\n", "\n")
 
 
-def ewp_config(cfg, debug, opt_level):
-    general = "".join([
-        opt("ExePath", cfg + r"\Exe"),
-        opt("ObjPath", cfg + r"\Obj"),
-        opt("ListPath", cfg + r"\List"),
-        opt("OGCoreOrChip", 1),
-        opt("OGChipSelectEditMenu", DEVICE),
-        opt("GFPUDeviceSlave", DEVICE),
-        opt("CoreVariant", 39, 26),
-        opt("GBECoreSlave", 39, 26),
-        opt("GFPUCoreSlave2", 39, 26),
-        opt("FPU2", 4, 0),
-        opt("NrRegs", 0, 0),
-        opt("GEndianMode", 0),
-        opt("GRuntimeLibSelect", 1, 0),
-        opt("GRuntimeLibSelectSlave", 1, 0),
-        opt("RTConfigPath2", r"$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h"),
-        opt("OGPrintfVariant", 1, 0),
-        opt("OGScanfVariant", 1, 0),
-        opt("OGUseCmsis", 0),
-        opt("OGUseCmsisDspLib", 0),
-        opt("GenLowLevelInterface", 0),
-        opt("DSPExtension", 1),
-    ])
-    iccarm = "".join([
-        opt("CCDefines", DEFINES),
-        opt("CCOptLevel", opt_level),
-        opt("CCOptLevelSlave", opt_level),
-        opt("CCOptStrategy", 1 if not debug else 0, 0),
-        opt("CCIncludePath2", INCLUDES),
-        opt("IccLang", 0),
-        opt("IccCDialect", 1),
-        opt("IccAllowVLA", 0),
-        opt("IccLanguageConformance", 0),
-        opt("IccCharIs", 1),
-        opt("IccFloatSemantics", 0),
-        opt("CCDiagSuppress", "Pa082,Pa089"),
-        opt("CCDebugInfo", 1),
-    ])
-    aarm = "".join([
-        opt("AUserIncludes", INCLUDES),
-        opt("ADebug", 1),
-    ])
-    objcopy = "".join([
-        opt("OOCOutputFormat", 1, 3),
-        opt("OCOutputOverride", 0),
-        opt("OOCOutputFile", NAME + ".hex"),
-        opt("OOCCommandLineProducer", 1),
-        opt("OOCObjCopyEnable", 1),
-    ])
-    ilink = "".join([
-        opt("IlinkOutputFile", NAME + ".out"),
-        opt("IlinkIcfOverride", 1),
-        opt("IlinkIcfFile", r"$PROJ_DIR$\stm32f401xc_flash.icf"),
-        opt("IlinkProgramEntryLabelSelect", 0),
-        opt("IlinkProgramEntryLabel", "__iar_program_start"),
-        opt("IlinkMapFile", 1),
-        opt("IlinkLogFile", 0),
-        opt("IlinkDebugInfoEnable", 1),
-    ])
-    return ("    <configuration>\n"
-            "        <name>%s</name>\n"
-            "        <toolchain>\n            <name>ARM</name>\n        </toolchain>\n"
-            "        <debug>%d</debug>\n%s%s%s%s%s"
-            "    </configuration>\n") % (
-        cfg, debug,
-        settings("General", 3, 35, general, debug),
-        settings("ICCARM", 2, 37, iccarm, debug),
-        settings("AARM", 2, 11, aarm, debug),
-        settings("OBJCOPY", 0, 1, objcopy, debug),
-        settings("ILINK", 0, 25, ilink, debug))
+def write(name, text):
+    with open(os.path.join(OUT, name), "w", encoding="utf-8", newline="\r\n") as f:
+        f.write(text)
 
 
-def group(name, files):
-    s = "    <group>\n        <name>%s</name>\n" % name
-    for f in files:
-        s += "        <file>\n            <name>%s</name>\n        </file>\n" % f
-    s += "    </group>\n"
-    return s
+def set_option(block, name, states):
+    """Replaces the <state> values of one <option>, keeps its <version>."""
+    pattern = re.compile(
+        r"(?P<indent>[ \t]*)<option>\n"
+        r"(?P<ind2>[ \t]*)<name>" + re.escape(name) + r"</name>\n"
+        r"(?P<ver>(?:[ \t]*<version>[^<]*</version>\n)?)"
+        r"(?:[ \t]*<state>[^<]*</state>\n|[ \t]*<state\s*/>\n)*"
+        r"(?P=indent)</option>")
+    m = pattern.search(block)
+    if m is None:
+        raise KeyError(f"option {name} not found in template")
+    ind2 = m.group("ind2")
+    body = "".join(f"{ind2}<state>{s}</state>\n" for s in states)
+    new = f"{m.group('indent')}<option>\n{ind2}<name>{name}</name>\n{m.group('ver')}{body}{m.group('indent')}</option>"
+    return block[:m.start()] + new + block[m.end():]
 
 
-def rel(p):
-    return "$PROJ_DIR$\\..\\" + os.path.relpath(p, ROOT).replace("/", "\\")
+def split(text):
+    """Returns (head, [configuration blocks], tail after the configurations)."""
+    starts = [m.start() for m in re.finditer(r"[ \t]*<configuration>\n", text)]
+    ends = [m.end() for m in re.finditer(r"[ \t]*</configuration>\n", text)]
+    head = text[:starts[0]]
+    blocks = [text[s:e] for s, e in zip(starts, ends)]
+    tail = text[ends[-1]:]
+    return head, blocks, tail
 
 
-def main():
+def file_groups(indent="    "):
     app = sorted(glob.glob(os.path.join(ROOT, "Core", "Src", "*.c")))
     app = [f for f in app if not f.endswith("system_stm32f4xx.c")]
-    inc = sorted(glob.glob(os.path.join(ROOT, "Core", "Inc", "*.h")))
 
-    ewp = '<?xml version="1.0" encoding="UTF-8"?>\n<project>\n    <fileVersion>3</fileVersion>\n'
-    ewp += ewp_config("Debug", 1, 1)
-    ewp += ewp_config("Release", 0, 3)
-    ewp += group("Application", [rel(f) for f in app])
-    ewp += group("Include", [rel(f) for f in inc])
-    ewp += group("CMSIS", [r"$PROJ_DIR$\startup_stm32f401xc.s",
-                           r"$PROJ_DIR$\..\Core\Src\system_stm32f4xx.c"])
-    ewp += "</project>\n"
+    def rel(p):
+        return "$PROJ_DIR$\\..\\" + os.path.relpath(p, ROOT).replace("/", "\\")
 
-    cspy = "".join([
-        opt("CInput", 1),
-        opt("CEndian", 1),
-        opt("CProcessor", 1),
-        opt("OCVariant", 0),
-        opt("MacOverride", 0),
-        opt("MemOverride", 0),
-        opt("RunToEnable", 1),
-        opt("RunToName", "main"),
-        opt("CExtraOptionsCheck", 0),
-        opt("DdfFileName", r"$TOOLKIT_DIR$\config\debugger\ST\STM32F401CC.ddf"),
-        opt("OCDownloadSuppressDownload", 0),
-        opt("OCDownloadVerifyAll", 1),
-        opt("UseFlashLoader", 1),
-        opt("CLowLevel", 1),
-        opt("OCBE8Slave", 1),
-        opt("OCDynDriverList", "STLINK_ID"),
-        opt("OverrideDefFlashBoard", 0),
-        opt("FlashLoadersV3", r"$TOOLKIT_DIR$\config\flashloader\ST\FlashSTM32F401xC.board"),
-    ])
-    stlink = "".join([
-        opt("CCSTLinkInterfaceRadio", 1),       # SWD
-        opt("CCSTLinkInterfaceCmdLine", 0),
-        opt("CCSTLinkResetList", 0, 1),         # normal reset
-        opt("CCCpuClockEdit", "84.0"),
-        opt("CCSwoClockAuto", 0),
-        opt("CCSwoClockEdit", 2000),
-    ])
-    ewd = '<?xml version="1.0" encoding="UTF-8"?>\n<project>\n    <fileVersion>3</fileVersion>\n'
-    for cfg, dbg in (("Debug", 1), ("Release", 0)):
-        ewd += ("    <configuration>\n        <name>%s</name>\n"
-                "        <toolchain>\n            <name>ARM</name>\n        </toolchain>\n"
-                "        <debug>%d</debug>\n%s%s    </configuration>\n") % (
-            cfg, dbg, settings("C-SPY", 2, 32, cspy, dbg), settings("STLINK_ID", 3, 7, stlink, dbg))
-    ewd += "</project>\n"
+    def group(name, files, subgroups="", level=1):
+        i = indent * level
+        s = f"{i}<group>\n{i}{indent}<name>{name}</name>\n{subgroups}"
+        for f in files:
+            s += f"{i}{indent}<file>\n{i}{indent}{indent}<name>{f}</name>\n{i}{indent}</file>\n"
+        return s + f"{i}</group>\n"
 
-    eww = ('<?xml version="1.0" encoding="UTF-8"?>\n<workspace>\n    <project>\n'
-           '        <path>$WS_DIR$\\%s.ewp</path>\n    </project>\n    <batchBuild />\n</workspace>\n') % NAME
+    out = group("Application", [rel(f) for f in app])
+    out += group("EWARM", [r"$PROJ_DIR$\startup_stm32f401xc.s"])
+    out += group("Drivers", [], group("CMSIS", [r"$PROJ_DIR$\..\Core\Src\system_stm32f4xx.c"], level=2))
+    out += group("Doc", [r"$PROJ_DIR$\..\README.md"])
+    return out
 
-    for ext, text in (("ewp", ewp), ("ewd", ewd), ("eww", eww)):
-        with open(os.path.join(EW, NAME + "." + ext), "w", newline="\r\n") as f:
-            f.write(text)
-    print("IAR project written to", EW)
+
+def replace_groups(tail):
+    """Drops the template's <group> elements and inserts ours."""
+    first = tail.find("    <group>")
+    if first < 0:
+        return tail
+    # everything after the last top level </group>
+    last = tail.rfind("    </group>\n")
+    rest = tail[last + len("    </group>\n"):]
+    return tail[:first] + file_groups() + rest
+
+
+def gen_ewp():
+    head, blocks, tail = split(read("template.ewp"))
+    tpl = blocks[0]
+    out = []
+    for cfg, opt in CONFIGS:
+        b = tpl.replace(f"<name>{TPL_CONFIG}</name>", f"<name>{cfg}</name>", 1)
+        for key in ("BrowseInfoPath", "ExePath", "ObjPath", "ListPath"):
+            sub = {"BrowseInfoPath": "BrowseInfo", "ExePath": "Exe", "ObjPath": "Obj", "ListPath": "List"}[key]
+            b = set_option(b, key, [f"{cfg}\\{sub}"])
+        b = set_option(b, "BuildFilesPath", [cfg])
+        b = set_option(b, "CCDefines", DEFINES)
+        b = set_option(b, "CCIncludePath2", INCLUDES)
+        b = set_option(b, "CCDiagSuppress", ["Pa082"])
+        b = set_option(b, "CCOptLevel", [str(opt)])
+        b = set_option(b, "CCOptLevelSlave", [str(opt)])
+        b = set_option(b, "OOCOutputFile", [f"{NAME}.hex"])
+        b = set_option(b, "IlinkOutputFile", [f"{NAME}.out"])
+        b = set_option(b, "IlinkIcfFile", [r"$PROJ_DIR$\stm32f401xc_flash.icf"])
+        if cfg == "Release":
+            b = b.replace("<debug>1</debug>", "<debug>0</debug>")
+        out.append(b)
+    write(NAME + ".ewp", head + "".join(out) + replace_groups(tail))
+
+
+def gen_ewd():
+    head, blocks, tail = split(read("template.ewd"))
+    tpl = blocks[0]
+    out = []
+    for cfg, _ in CONFIGS:
+        b = tpl.replace(f"<name>{TPL_CONFIG}</name>", f"<name>{cfg}</name>", 1)
+        # 84 MHz core clock (SWO timing of the J-Link / ST-Link drivers)
+        b = b.replace("<state>72.0</state>", "<state>84.0</state>")
+        if cfg == "Release":
+            b = b.replace("<debug>1</debug>", "<debug>0</debug>")
+        out.append(b)
+    write(NAME + ".ewd", head + "".join(out) + tail)
+
+
+def gen_ewt():
+    head, blocks, tail = split(read("template.ewt"))
+    tpl = blocks[0]
+    out = []
+    for cfg, _ in CONFIGS:
+        b = tpl.replace(f"<name>{TPL_CONFIG}</name>", f"<name>{cfg}</name>", 1)
+        b = b.replace(f"{TPL_CONFIG}/C-STAT", f"{cfg}/C-STAT")
+        if cfg == "Release":
+            b = b.replace("<debug>1</debug>", "<debug>0</debug>")
+        out.append(b)
+    write(NAME + ".ewt", head + "".join(out) + replace_groups(tail))
+
+
+def gen_eww():
+    write(NAME + ".eww", read("template.eww").replace("USB_Audio_DAC", NAME))
 
 
 if __name__ == "__main__":
-    main()
+    gen_ewp()
+    gen_ewd()
+    gen_ewt()
+    gen_eww()
+    print("IAR project written to", OUT)

@@ -6,7 +6,6 @@ EWARM/Debug/
 EWARM/Release/
 EWARM/settings/
 EWARM/*.dep
-EWARM/*.ewt
 EWARM/*.dni
 *.bak
 

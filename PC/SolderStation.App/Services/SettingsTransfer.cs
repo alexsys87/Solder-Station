@@ -43,12 +43,12 @@ public static class SettingsTransfer
             {
                 if (!device.TryGetValue(key, out var p))
                 {
-                    warnings.Add($"Параметр «{key}» не поддерживается прошивкой — пропущен");
+                    warnings.Add(Loc.F("T.Unsupported", key));
                     continue;
                 }
                 int v = Math.Clamp(value, p.Min, p.Max);
-                if (v != value) warnings.Add($"«{key}»: {value} вне диапазона, записано {v}");
-                progress?.Report($"Параметр {key} = {v}");
+                if (v != value) warnings.Add(Loc.F("T.Clamped", key, value, v));
+                progress?.Report(Loc.F("T.Param", key, v));
                 await client.SetParamAsync(p.Key, v);
             }
         }
@@ -57,18 +57,18 @@ public static class SettingsTransfer
         {
             var list = await client.GetTipsAsync();
             int wanted = Math.Min(file.Tips.Count, list.Max);
-            if (file.Tips.Count > list.Max) warnings.Add($"В файле {file.Tips.Count} жал, устройство хранит {list.Max}");
+            if (file.Tips.Count > list.Max) warnings.Add(Loc.F("T.TooManyTips", file.Tips.Count, list.Max));
 
             int count = list.Tips.Count;
             while (count < wanted)
             {
-                progress?.Report("Добавление профиля жала");
+                progress?.Report(Loc.T("T.AddTip"));
                 await client.AddTipAsync("TIP");
                 count++;
             }
             while (count > wanted)
             {
-                progress?.Report("Удаление лишнего профиля");
+                progress?.Report(Loc.T("T.DelTip"));
                 await client.DeleteTipAsync(count - 1);
                 count--;
             }
@@ -82,8 +82,8 @@ public static class SettingsTransfer
             {
                 var t = file.Tips[i];
                 bool calOk = t.CalAdc.Length == 3 && t.CalDt.Length == 3;
-                if (!calOk) warnings.Add($"Жало «{t.Name}»: нет калибровки, оставлена по умолчанию");
-                progress?.Report($"Жало {i + 1}: {t.Name}");
+                if (!calOk) warnings.Add(Loc.F("T.NoCal", t.Name));
+                progress?.Report(Loc.F("T.Tip", i + 1, t.Name));
                 await client.WriteTipAsync(i, new TipData
                 {
                     Index = i,
@@ -99,7 +99,7 @@ public static class SettingsTransfer
             await client.SelectTipAsync(Math.Clamp(file.ActiveTip, 0, wanted - 1));
         }
 
-        progress?.Report("Сохранение во флеш");
+        progress?.Report(Loc.T("T.Saving"));
         await client.SaveAsync();
         return warnings;
     }
@@ -110,9 +110,9 @@ public static class SettingsTransfer
     public static SettingsFile LoadFromFile(string path)
     {
         var file = JsonSerializer.Deserialize<SettingsFile>(File.ReadAllText(path), JsonOptions)
-                   ?? throw new InvalidDataException("Пустой файл");
+                   ?? throw new InvalidDataException(Loc.T("T.EmptyFile"));
         if (file.Format != SettingsFile.FormatId)
-            throw new InvalidDataException("Это не файл настроек паяльной станции");
+            throw new InvalidDataException(Loc.T("T.NotSettings"));
         return file;
     }
 
