@@ -6,7 +6,8 @@ ROOT = ../..
 CFLAGS = -std=c11 -Wall -Wno-unused-function -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast \
          -Wno-format-truncation
 SIM_SRC = sim.c $(ROOT)/Core/Src/ui.c $(ROOT)/Core/Src/menu.c $(ROOT)/Core/Src/gfx.c \
-          $(ROOT)/Core/Src/fonts_small.c $(ROOT)/Core/Src/fonts_digits.c $(ROOT)/Core/Src/settings.c
+          $(ROOT)/Core/Src/fonts_small.c $(ROOT)/Core/Src/fonts_cyr.c $(ROOT)/Core/Src/fonts_digits.c \
+          $(ROOT)/Core/Src/lang.c $(ROOT)/Core/Src/settings.c
 PROTO_SRC = proto_test.c $(ROOT)/Core/Src/proto.c $(ROOT)/Core/Src/settings.c
 
 all: sim proto_test

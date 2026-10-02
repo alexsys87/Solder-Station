@@ -102,7 +102,7 @@ def main():
         src.append(f"static const uint8_t {name}_widths[{len(widths)}] = {{ " + ", ".join(map(str, widths)) + " };")
         src.append(f"static const uint16_t {name}_offsets[{len(offsets)}] = {{ " + ", ".join(map(str, offsets)) + " };\n")
         src.append(f"const font_t {name} = {{\n    {height}U, 2U, 0U, {len(chars)}U, \"{chars}\", 0U,\n"
-                   f"    {name}_widths, {name}_offsets, {name}_data\n}};\n")
+                   f"    {name}_widths, {name}_offsets, {name}_data, 0\n}};\n")
         if "--preview" in sys.argv:
             for ch, cols in glyphs:
                 print(f"{name} '{ch}'")

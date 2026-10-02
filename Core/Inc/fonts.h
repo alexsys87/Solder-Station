@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-typedef struct {
+typedef struct font_s {
     uint8_t         height;     /* glyph height, pixels                       */
     uint8_t         spacing;    /* empty columns after each glyph             */
     uint8_t         first;      /* first code (when map == NULL)              */
@@ -19,6 +19,7 @@ typedef struct {
     const uint8_t  *widths;     /* per glyph width or NULL                    */
     const uint16_t *offsets;    /* per glyph data offset or NULL              */
     const uint8_t  *data;
+    const struct font_s *next;  /* searched for codes missing here, or NULL */
 } font_t;
 
 /* Special characters of the small font */
@@ -30,7 +31,8 @@ typedef struct {
 #define CH_BELL     "\x84"      /* bell                 */
 #define CH_FLASH    "\x85"      /* heating (lightning)  */
 
-extern const font_t font_small;     /* 5x7, ASCII 0x20..0x85            */
+extern const font_t font_small;     /* 5x7, ASCII 0x20..0x85 + font_cyr */
+extern const font_t font_cyr;       /* 5x7, Cyrillic 0xC0..0xFF (cp1251) */
 extern const font_t font_mid;       /* 16 px digits "0123456789:-. "    */
 extern const font_t font_big;       /* 32 px digits "0123456789:- "     */
 

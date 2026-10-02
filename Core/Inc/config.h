@@ -11,7 +11,7 @@
 /* ------------------------------------------------------------------------- */
 /* Firmware version                                                          */
 /* ------------------------------------------------------------------------- */
-#define FW_VERSION_STR          "1.1.0"
+#define FW_VERSION_STR          "1.2.0"
 
 /* ------------------------------------------------------------------------- */
 /* Display controller                                                        */
@@ -105,6 +105,10 @@
 #define USE_USB                 1   /* USB CDC virtual COM port (PA11/PA12)   */
 
 #define USE_WATCHDOG            1   /* IWDG, ~2 s timeout                     */
+
+/* UI language of fresh / factory reset settings: 0 = English, 1 = Russian.
+ * It can be changed at any time in the menu (Language / Yazyk). */
+#define DEFAULT_LANGUAGE        1
 
 /* ------------------------------------------------------------------------- */
 /* Limits and safety                                                         */

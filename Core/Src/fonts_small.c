@@ -1,6 +1,7 @@
 /**
  * @file    fonts_small.c
  * @brief   Classic 5x7 font (ASCII 0x20..0x7E) plus a few symbols.
+ *          Cyrillic letters live in fonts_cyr.c (chained via .next).
  */
 #include "fonts.h"
 
@@ -111,5 +112,5 @@ static const uint8_t font_small_data[] = {
 
 const font_t font_small = {
     8U, 1U, 0x20U, (uint8_t)(sizeof(font_small_data) / 5U), 0, 5U,
-    0, 0, font_small_data
+    0, 0, font_small_data, &font_cyr
 };

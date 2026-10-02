@@ -17,6 +17,7 @@
 #include "board.h"
 #include "sys.h"
 #include "settings.h"
+#include "lang.h"
 #include "iron.h"
 #include "rtc.h"
 #include "ui.h"
@@ -250,6 +251,7 @@ static const param_t s_params[] = {
     { "heater_res",  &g_set.heater_res,  PT_U16, 20,  200 },
     { "low_volt",    &g_set.low_volt,    PT_U16, 0,   300 },
     { "adc_offset",  &g_set.adc_offset,  PT_I16, -500, 500 },
+    { "lang",        &g_set.lang,        PT_U8,  0,   LANG_COUNT - 1 },
 };
 #define PARAM_COUNT (sizeof(s_params) / sizeof(s_params[0]))
 

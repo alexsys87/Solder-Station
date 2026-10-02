@@ -12,6 +12,7 @@
 #include "flash.h"
 #include "heater.h"
 #include "sys.h"
+#include "lang.h"
 #include <string.h>
 #include <stddef.h>
 
@@ -140,6 +141,8 @@ void settings_defaults(void)
     g_set.heater_res  = 80U;    /* 8.0 Ohm (T12) */
     g_set.low_volt    = 0U;
     g_set.adc_offset  = 0;
+
+    g_set.lang        = (uint8_t)DEFAULT_LANGUAGE;
 }
 
 /* Clamp values that could have been damaged or are out of range */
@@ -154,6 +157,7 @@ static void settings_sanitize(void)
     if (g_set.pwm_period < 50U || g_set.pwm_period > 500U) g_set.pwm_period = 100U;
     if (g_set.adc_delay < 5U || g_set.adc_delay > 200U) g_set.adc_delay = 25U;
     if (g_set.temp_step == 0U) g_set.temp_step = 1U;
+    if (g_set.lang >= (uint8_t)LANG_COUNT) g_set.lang = (uint8_t)LANG_EN;
     for (i = 0; i < g_set.tip_count; i++) {
         tip_t *t = &g_set.tips[i];
         t->name[TIP_NAME_LEN] = '\0';

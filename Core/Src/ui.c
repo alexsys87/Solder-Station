@@ -21,6 +21,7 @@
 #include "oled.h"
 #include "sys.h"
 #include "config.h"
+#include "lang.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -68,7 +69,7 @@ static uint16_t s_cal_adc[CAL_POINTS];
 static int16_t  s_cal_dt[CAL_POINTS];
 static screen_t s_cal_return;           /* screen to go back to          */
 
-static const char * const s_wday[8] = { "", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+static const uint16_t s_wday[8] = { S_NONE, S_MON, S_TUE, S_WED, S_THU, S_FRI, S_SAT, S_SUN };
 
 /* ------------------------------------------------------------------------- */
 /* Helpers                                                                   */
@@ -301,8 +302,8 @@ static void draw_clock(void)
     snprintf(hh, sizeof(hh), "%u", (unsigned)hour);
     snprintf(mm, sizeof(mm), "%02u", (unsigned)t.min);
 
-    snprintf(buf, sizeof(buf), "OFF  Set %u" CH_DEG, (unsigned)settings_tip()->setpoint);
-    if (iron_errors() & IRON_ERR_NO_TIP) snprintf(tip, sizeof(tip), "No tip");
+    snprintf(buf, sizeof(buf), tr(S_OFF_SET_FMT), (unsigned)settings_tip()->setpoint);
+    if (iron_errors() & IRON_ERR_NO_TIP) snprintf(tip, sizeof(tip), "%s", tr(S_NO_TIP));
     else snprintf(tip, sizeof(tip), "%d" CH_DEG "C", iround(iron_status()->tip_disp));
     draw_status_bar(buf, tip);
 
@@ -318,7 +319,7 @@ static void draw_clock(void)
         gfx_text(x, y, t.hour < 12U ? "AM" : "PM", &font_small);
     }
 
-    snprintf(buf, sizeof(buf), "%s %02u.%02u.20%02u", s_wday[t.wday & 7U],
+    snprintf(buf, sizeof(buf), "%s %02u.%02u.20%02u", tr((str_id_t)s_wday[t.wday & 7U]),
              (unsigned)t.day, (unsigned)t.month, (unsigned)t.year);
     gfx_text_center(55, buf, &font_small);
 }
@@ -330,18 +331,18 @@ static void draw_error(uint8_t err)
     char v[12];
 
     if (err & IRON_ERR_OVERHEAT) {
-        title = "OVERHEAT";
-        snprintf(hint, sizeof(hint), "Click to reset");
+        title = tr(S_ERR_OVERHEAT);
+        snprintf(hint, sizeof(hint), "%s", tr(S_HINT_RESET));
     } else if (err & IRON_ERR_RUNAWAY) {
-        title = "RUNAWAY";
-        snprintf(hint, sizeof(hint), "Check heater. Click");
+        title = tr(S_ERR_RUNAWAY);
+        snprintf(hint, sizeof(hint), "%s", tr(S_HINT_HEATER));
     } else if (err & IRON_ERR_NO_TIP) {
-        title = "NO TIP";
-        snprintf(hint, sizeof(hint), "Insert tip / handle");
+        title = tr(S_ERR_NO_TIP);
+        snprintf(hint, sizeof(hint), "%s", tr(S_HINT_TIP));
     } else {
-        title = "LOW VOLT";
+        title = tr(S_ERR_LOW_VOLT);
         fmt_f1(v, sizeof(v), iron_status()->vin);
-        snprintf(hint, sizeof(hint), "Vin %sV", v);
+        snprintf(hint, sizeof(hint), tr(S_HINT_VIN_FMT), v);
     }
     gfx_text2x((OLED_W - gfx_text2x_width(title)) / 2, 20, title);
     gfx_text_center(46, hint, &font_small);
@@ -372,11 +373,19 @@ static void draw_main(void)
 
     /* status bar */
     switch (mode) {
-    case IRON_OFF:   snprintf(right, sizeof(right), iron_auto_off() ? "AUTO OFF" : "OFF"); break;
-    case IRON_RUN:   snprintf(right, sizeof(right), iron_stable(500U) ? "READY" : CH_FLASH "HEAT"); break;
-    case IRON_BOOST: snprintf(right, sizeof(right), CH_UP "BOOST %lus", (unsigned long)iron_boost_left_s()); break;
-    case IRON_SLEEP: snprintf(right, sizeof(right), "SLEEP zZ"); break;
-    default:         snprintf(right, sizeof(right), "CAL"); break;
+    case IRON_OFF:
+        snprintf(right, sizeof(right), "%s", tr(iron_auto_off() ? S_ST_AUTO_OFF : S_ST_OFF));
+        break;
+    case IRON_RUN:
+        if (iron_stable(500U)) snprintf(right, sizeof(right), "%s", tr(S_ST_READY));
+        else                   snprintf(right, sizeof(right), CH_FLASH "%s", tr(S_ST_HEAT));
+        break;
+    case IRON_BOOST:
+        right[0] = CH_UP[0];
+        snprintf(&right[1], sizeof(right) - 1U, tr(S_ST_BOOST_FMT), (unsigned long)iron_boost_left_s());
+        break;
+    case IRON_SLEEP: snprintf(right, sizeof(right), "%s", tr(S_ST_SLEEP)); break;
+    default:         snprintf(right, sizeof(right), "%s", tr(S_ST_CAL)); break;
     }
     draw_status_bar(tip->name, right);
 
@@ -390,7 +399,7 @@ static void draw_main(void)
     show_set = (now < s_set_view_until) || (mode == IRON_OFF);
     if (show_set) {
         draw_big_temp(13, tip->setpoint, false);
-        gfx_text(0, 13, "SET", &font_small);
+        gfx_text(0, 13, tr(S_SET), &font_small);
     } else {
         draw_big_temp(13, tip_t_c, no_tip);
     }
@@ -405,22 +414,22 @@ static void draw_main(void)
     fmt_f1(v, sizeof(v), st->vin);
     switch (mode) {
     case IRON_OFF:
-        if (no_tip)                       snprintf(left, sizeof(left), "No tip");
-        else                              snprintf(left, sizeof(left), "Tip %d" CH_DEG "C", tip_t_c);
+        if (no_tip) snprintf(left, sizeof(left), "%s", tr(S_NO_TIP));
+        else        snprintf(left, sizeof(left), tr(S_TIP_FMT), tip_t_c);
         if (!no_tip && tip_t_c >= TEMP_HOT_WARN && ((now / 500U) & 1U)) {
-            snprintf(right, sizeof(right), "HOT!");
+            snprintf(right, sizeof(right), "%s", tr(S_HOT));
         } else {
-            snprintf(right, sizeof(right), "%sV", v);
+            snprintf(right, sizeof(right), tr(S_V_FMT), v);
         }
         break;
     case IRON_SLEEP:
-        snprintf(left, sizeof(left), "Sleep %u" CH_DEG "C", (unsigned)iron_target());
-        snprintf(right, sizeof(right), "%sV", v);
+        snprintf(left, sizeof(left), tr(S_SLEEP_FMT), (unsigned)iron_target());
+        snprintf(right, sizeof(right), tr(S_V_FMT), v);
         break;
     default:
-        if (show_set) snprintf(left, sizeof(left), "Tip %d" CH_DEG "C", tip_t_c);
-        else          snprintf(left, sizeof(left), "Set %u" CH_DEG "C", (unsigned)iron_target());
-        snprintf(right, sizeof(right), "%dW %sV", iround(st->power_w), v);
+        if (show_set) snprintf(left, sizeof(left), tr(S_TIP_FMT), tip_t_c);
+        else          snprintf(left, sizeof(left), tr(S_SET_FMT), (unsigned)iron_target());
+        snprintf(right, sizeof(right), tr(S_W_V_FMT), iround(st->power_w), v);
         break;
     }
     gfx_text(0, 56, left, &font_small);
@@ -432,7 +441,7 @@ static void draw_main(void)
         gfx_fill(0, 11, OLED_W, 44);
         gfx_set_mode(GFX_SET);
         gfx_rect(4, 14, OLED_W - 8, 32);
-        gfx_text_center(17, "Tip", &font_small);
+        gfx_text_center(17, tr(S_TIP), &font_small);
         gfx_text2x((OLED_W - gfx_text2x_width(tip->name)) / 2, 27, tip->name);
     }
 }
@@ -559,15 +568,15 @@ static void draw_cal(void)
 
     gfx_clear();
     if (s_cal_step >= CAL_POINTS) {
-        draw_title("Calibration");
-        gfx_text2x((OLED_W - gfx_text2x_width(s_cal_ok ? "DONE" : "FAILED")) / 2, 20,
-                   s_cal_ok ? "DONE" : "FAILED");
-        gfx_text_center(44, s_cal_ok ? "Saved to tip profile" : "Values not monotonic", &font_small);
-        gfx_text_center(55, "Click to exit", &font_small);
+        const char *res = tr(s_cal_ok ? S_DONE : S_FAILED);
+        draw_title(tr(S_CALIBRATION));
+        gfx_text2x((OLED_W - gfx_text2x_width(res)) / 2, 20, res);
+        gfx_text_center(44, tr(s_cal_ok ? S_CAL_SAVED : S_CAL_BAD), &font_small);
+        gfx_text_center(55, tr(S_CLICK_EXIT), &font_small);
         return;
     }
 
-    snprintf(buf, sizeof(buf), "Calibration %u/%u", (unsigned)(s_cal_step + 1U), (unsigned)CAL_POINTS);
+    snprintf(buf, sizeof(buf), tr(S_CAL_STEP_FMT), (unsigned)(s_cal_step + 1U), (unsigned)CAL_POINTS);
     draw_title(buf);
 
     if (iron_errors() != 0U) {
@@ -576,16 +585,16 @@ static void draw_cal(void)
     }
 
     if (!s_cal_input) {
-        snprintf(buf, sizeof(buf), "Target %u" CH_DEG "C", (unsigned)s_cal_targets[s_cal_step]);
+        snprintf(buf, sizeof(buf), tr(S_TARGET_FMT), (unsigned)s_cal_targets[s_cal_step]);
         gfx_text(0, 11, buf, &font_small);
         draw_big_temp(20, iround(st->tip_disp), false);
-        gfx_text(0, 56, iron_stable(500U) ? "Stabilizing..." : "Heating...", &font_small);
-        gfx_text_right(OLED_W, 56, "Click:skip", &font_small);
+        gfx_text(0, 56, tr(iron_stable(500U) ? S_SETTLING : S_HEATING), &font_small);
+        gfx_text_right(OLED_W, 56, tr(S_CLICK_SKIP), &font_small);
     } else {
-        gfx_text(0, 11, "Real tip temp:", &font_small);
+        gfx_text(0, 11, tr(S_REAL_TEMP), &font_small);
         draw_big_temp(20, s_cal_val, false);
-        gfx_text(0, 56, "Click=OK", &font_small);
-        gfx_text_right(OLED_W, 56, "Hold=abort", &font_small);
+        gfx_text(0, 56, tr(S_CLICK_OK), &font_small);
+        gfx_text_right(OLED_W, 56, tr(S_HOLD_ABORT), &font_small);
     }
 }
 
@@ -600,22 +609,23 @@ static void draw_info(void)
     char b[12];
 
     gfx_clear();
-    draw_title("Info  FW " FW_VERSION_STR);
+    snprintf(buf, sizeof(buf), "%s  FW " FW_VERSION_STR, tr(S_INFO));
+    draw_title(buf);
 
     fmt_f1(a, sizeof(a), st->vin);
     fmt_f1(b, sizeof(b), st->power_w);
-    snprintf(buf, sizeof(buf), "Vin %sV  %sW", a, b);
+    snprintf(buf, sizeof(buf), tr(S_INFO_VIN_FMT), a, b);
     gfx_text(0, 11, buf, &font_small);
 
-    snprintf(buf, sizeof(buf), "Tip %d" CH_DEG "C  ADC %d", iround(st->tip_c), iround(st->tip_raw));
+    snprintf(buf, sizeof(buf), tr(S_INFO_TIP_FMT), iround(st->tip_c), iround(st->tip_raw));
     gfx_text(0, 20, buf, &font_small);
 
     fmt_f1(a, sizeof(a), st->cj_c);
     fmt_f1(b, sizeof(b), st->chip_c);
-    snprintf(buf, sizeof(buf), "CJ %s  MCU %s" CH_DEG "C", a, b);
+    snprintf(buf, sizeof(buf), tr(S_INFO_CJ_FMT), a, b);
     gfx_text(0, 29, buf, &font_small);
 
-    snprintf(buf, sizeof(buf), "Duty %d.%d%%  Err %02X", iround(st->duty * 1000.0f) / 10,
+    snprintf(buf, sizeof(buf), tr(S_INFO_DUTY_FMT), iround(st->duty * 1000.0f) / 10,
              iround(st->duty * 1000.0f) % 10, (unsigned)iron_errors());
     gfx_text(0, 38, buf, &font_small);
 
@@ -623,7 +633,7 @@ static void draw_info(void)
              rtc_lse_ok() ? "LSE" : "LSI");
     gfx_text(0, 47, buf, &font_small);
 
-    snprintf(buf, sizeof(buf), "Saves %lu  Moves %lu", (unsigned long)g_set.seq,
+    snprintf(buf, sizeof(buf), tr(S_INFO_SAVES_FMT), (unsigned long)g_set.seq,
              (unsigned long)motion_count());
     gfx_text(0, 56, buf, &font_small);
 }
@@ -631,10 +641,10 @@ static void draw_info(void)
 static void draw_confirm(void)
 {
     gfx_clear();
-    draw_title("Confirm");
+    draw_title(tr(S_CONFIRM));
     gfx_text_center(20, s_question, &font_small);
-    gfx_text_center(40, "Click = Yes", &font_small);
-    gfx_text_center(50, "Hold  = No ", &font_small);
+    gfx_text_center(40, tr(S_CLICK_YES), &font_small);
+    gfx_text_center(50, tr(S_HOLD_NO), &font_small);
 }
 
 static void draw_msg(void)
@@ -643,21 +653,21 @@ static void draw_msg(void)
     gfx_rect(0, 0, OLED_W, OLED_H);
     gfx_text_center(18, s_msg1, &font_small);
     gfx_text_center(30, s_msg2, &font_small);
-    gfx_text_center(50, "Click", &font_small);
+    gfx_text_center(50, tr(S_CLICK), &font_small);
 }
 
 static void draw_splash(void)
 {
     gfx_clear();
     gfx_text2x((OLED_W - gfx_text2x_width("T12")) / 2, 4, "T12");
-    gfx_text_center(24, "SOLDERING STATION", &font_small);
+    gfx_text_center(24, tr(S_STATION), &font_small);
     gfx_text_center(36, "FW " FW_VERSION_STR, &font_small);
 #if (OLED_CONTROLLER == OLED_SH1106)
     gfx_text_center(48, "STM32F401  SH1106", &font_small);
 #else
     gfx_text_center(48, "STM32F401  SSD1306", &font_small);
 #endif
-    if (!settings_loaded()) gfx_text_center(56, "defaults loaded", &font_small);
+    if (!settings_loaded()) gfx_text_center(56, tr(S_DEFAULTS_LOADED), &font_small);
 }
 
 /* ------------------------------------------------------------------------- */

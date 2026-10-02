@@ -220,10 +220,12 @@
     <sys:String x:Key="P.heater_res" xml:space="preserve">Сопротивление нагревателя</sys:String>
     <sys:String x:Key="P.low_volt" xml:space="preserve">Порог низкого напряжения</sys:String>
     <sys:String x:Key="P.adc_offset" xml:space="preserve">Смещение нуля усилителя</sys:String>
+    <sys:String x:Key="P.lang" xml:space="preserve">Язык меню станции</sys:String>
     <sys:String x:Key="H.motion_en" xml:space="preserve">Пробуждение из сна движением ручки</sys:String>
     <sys:String x:Key="H.sleep_time" xml:space="preserve">Без движения ручки и действий с энкодером</sys:String>
     <sys:String x:Key="H.clock_en" xml:space="preserve">Часы чередуются с уставкой, когда паяльник выключен</sys:String>
     <sys:String x:Key="H.adc_delay" xml:space="preserve">Время от выключения нагревателя до запуска АЦП</sys:String>
+    <sys:String x:Key="H.lang" xml:space="preserve">Язык надписей на дисплее станции</sys:String>
     <sys:String x:Key="Z.never" xml:space="preserve">никогда</sys:String>
     <sys:String x:Key="Z.none" xml:space="preserve">нет</sys:String>
     <sys:String x:Key="Z.off" xml:space="preserve">выкл</sys:String>
@@ -233,6 +235,8 @@
     <sys:String x:Key="O.clock_24h.1" xml:space="preserve">24 ч</sys:String>
     <sys:String x:Key="O.enc_invert.0" xml:space="preserve">Обычное</sys:String>
     <sys:String x:Key="O.enc_invert.1" xml:space="preserve">Обратное</sys:String>
+    <sys:String x:Key="O.lang.0" xml:space="preserve">English</sys:String>
+    <sys:String x:Key="O.lang.1" xml:space="preserve">Русский</sys:String>
     <sys:String x:Key="U.C" xml:space="preserve">°C</sys:String>
     <sys:String x:Key="U.s" xml:space="preserve">с</sys:String>
     <sys:String x:Key="U.min" xml:space="preserve">мин</sys:String>
