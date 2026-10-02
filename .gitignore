@@ -14,3 +14,10 @@ EWARM/*.dni
 tools/sim/sim
 tools/sim/*.pbm
 __pycache__/
+tools/sim/proto_test
+
+# Visual Studio / .NET
+.vs/
+PC/**/bin/
+PC/**/obj/
+*.user

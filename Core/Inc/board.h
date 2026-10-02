@@ -18,7 +18,8 @@
  *  Encoder SW          PB8    GPIO input, pull-up
  *  Vibration sensor    PB9    EXTI9, pull-up
  *  Buzzer              PB4    TIM3_CH1 (AF2)
- *  Telemetry TX        PA9    USART1_TX (AF7)
+ *  UART TX / RX        PA9/10 USART1 (AF7), text protocol
+ *  USB D- / D+         PA11/12 OTG FS (AF10), CDC virtual COM port
  *  On-board LED        PC13   GPIO, active low
  *  32.768 kHz crystal  PC14/PC15 (LSE for RTC)
  */
@@ -81,8 +82,9 @@
 #define BUZZER_PORT             GPIOB
 #define BUZZER_PIN              4U
 
-#define UART_TX_PORT            GPIOA
+#define UART_PORT               GPIOA
 #define UART_TX_PIN             9U
+#define UART_RX_PIN             10U
 
 #define LED_PORT                GPIOC
 #define LED_PIN                 13U
@@ -138,6 +140,7 @@ static inline void led_set(bool on)
 #define IRQ_PRIO_SYSTICK        2U   /* 1 ms tick, input sampling            */
 #define IRQ_PRIO_OLED_DMA       3U
 #define IRQ_PRIO_EXTI           3U
-#define IRQ_PRIO_UART_DMA       4U
+#define IRQ_PRIO_USB            4U
+#define IRQ_PRIO_UART           4U
 
 #endif /* BOARD_H */

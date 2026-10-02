@@ -1,0 +1,80 @@
+<Window x:Class="SolderStation.Views.CalibrationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Калибровка жала"
+        Width="480" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" ShowInTaskbar="False"
+        Language="ru-RU" FontFamily="Segoe UI" FontSize="13"
+        Background="{DynamicResource WindowBrush}"
+        Foreground="{DynamicResource TextBrush}">
+
+    <StackPanel Margin="18">
+        <TextBlock Style="{StaticResource Header}" FontSize="17">
+            <Run Text="Жало"/> <Run Text="{Binding TipName, Mode=OneWay}"/>
+        </TextBlock>
+
+        <!-- progress over the three points -->
+        <Grid Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="250 °C" HorizontalAlignment="Center" Style="{StaticResource Caption}"/>
+            <TextBlock Grid.Column="1" Text="350 °C" HorizontalAlignment="Center" Style="{StaticResource Caption}"/>
+            <TextBlock Grid.Column="2" Text="450 °C" HorizontalAlignment="Center" Style="{StaticResource Caption}"/>
+        </Grid>
+        <ProgressBar Maximum="3" Value="{Binding Step, Mode=OneWay}" Margin="0,0,0,14"/>
+
+        <Border Style="{StaticResource Card}">
+            <StackPanel>
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Right" Text="{Binding Target, StringFormat=цель {0} °C}"
+                               Style="{StaticResource Caption}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding StepText}" FontWeight="SemiBold" FontSize="15"/>
+                </DockPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <TextBlock Text="{Binding TipTemp, StringFormat={}{0:0.0}}" FontSize="48" FontWeight="Light"/>
+                    <TextBlock Text="°C" FontSize="20" Margin="6,10,0,0" Foreground="{DynamicResource SubTextBrush}"/>
+                </StackPanel>
+                <TextBlock Text="по текущей калибровке" Style="{StaticResource Caption}"/>
+                <TextBlock Margin="0,6,0,0" FontWeight="SemiBold">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="Стабилизация…"/>
+                            <Setter Property="Foreground" Value="{DynamicResource WarningBrush}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsStable}" Value="True">
+                                    <Setter Property="Text" Value="Температура стабильна — можно измерять"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource SuccessBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <TextBlock Text="{Binding Message}" TextWrapping="Wrap" Margin="0,0,0,12"/>
+
+        <StackPanel IsEnabled="{Binding CanRecord}">
+            <TextBlock Text="Температура по термометру, °C" Style="{StaticResource Caption}" Margin="0,0,0,4"/>
+            <DockPanel Margin="0,0,0,12">
+                <Button DockPanel.Dock="Left" Content="−10" Width="46" Command="{Binding AdjustMeasuredCommand}" CommandParameter="-10"/>
+                <Button DockPanel.Dock="Left" Content="−1" Width="38" Command="{Binding AdjustMeasuredCommand}" CommandParameter="-1"/>
+                <Button DockPanel.Dock="Right" Content="+10" Width="46" Margin="6,0,0,6"
+                        Command="{Binding AdjustMeasuredCommand}" CommandParameter="10"/>
+                <Button DockPanel.Dock="Right" Content="+1" Width="38" Margin="6,0,0,6"
+                        Command="{Binding AdjustMeasuredCommand}" CommandParameter="1"/>
+                <TextBox Text="{Binding Measured, UpdateSourceTrigger=PropertyChanged}" FontSize="22" Margin="0,0,0,6"
+                         HorizontalContentAlignment="Center"/>
+            </DockPanel>
+        </StackPanel>
+
+        <DockPanel>
+            <Button DockPanel.Dock="Right" Content="Закрыть" Command="{Binding CloseCommand}" Margin="6,0,0,0"/>
+            <Button Style="{StaticResource AccentButton}" Content="Записать точку" HorizontalAlignment="Left"
+                    Command="{Binding RecordPointCommand}" IsEnabled="{Binding CanRecord}"/>
+        </DockPanel>
+    </StackPanel>
+</Window>

@@ -11,7 +11,8 @@
  *   SPI1  + DMA2 Stream3: OLED frame transfer
  *   TIM4  encoder interface (hardware quadrature decoder, input filters)
  *   TIM3  CH1 buzzer tone
- *   USART1 + DMA2 Stream7: telemetry
+ *   USART1 + DMA2 Stream7: text protocol (TX by DMA, RX by interrupt)
+ *   OTG FS  USB CDC virtual COM port with the same protocol
  *   RTC   (LSE) calendar for the clock
  *   EXTI9 vibration sensor
  *   CRC   settings checksum, FLASH sectors 1-2 settings storage
@@ -27,11 +28,15 @@
 #include "motion.h"
 #include "settings.h"
 #include "iron.h"
-#include "telemetry.h"
+#include "uart.h"
+#include "usb_cdc.h"
+#include "proto.h"
 #include "ui.h"
 
 int main(void)
 {
+    proto_check_bootloader();       /* "DFU" command: jump to ROM bootloader */
+
     sys_clock_init();
     sys_gpio_init();
     sys_tick_init();
@@ -43,9 +48,16 @@ int main(void)
     motion_init();
     oled_init();
     rtc_init();
-    telemetry_init();
+#if USE_UART
+    uart_init(UART_BAUD);
+#endif
     iron_init();
     ui_init();
+
+#if USE_USB
+    usb_cdc_init();
+#endif
+    proto_init();
 
     sys_wdg_init();
     buzzer_short();
@@ -61,7 +73,7 @@ int main(void)
         iron_task();
         ui_task();
         settings_task();
-        telemetry_task();
+        proto_task();
 
         __WFI();    /* wake up on the next interrupt (SysTick at least) */
     }
