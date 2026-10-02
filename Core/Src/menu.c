@@ -12,6 +12,7 @@
 #include "gfx.h"
 #include "oled.h"
 #include "config.h"
+#include "lang.h"
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
@@ -38,7 +39,7 @@ typedef enum {
 typedef struct menu menu_t;
 
 typedef struct {
-    const char         *label;
+    uint16_t            label;          /* str_id_t                        */
     uint8_t             type;
     uint8_t             flags;
     uint8_t             dec;            /* decimals of fixed point numbers */
@@ -47,8 +48,8 @@ typedef struct {
     uint16_t            tofs;           /* offset in tip_t (MF_TIP)        */
     int16_t             min;
     int16_t             max;
-    const char         *unit;
-    const char * const *opts;
+    uint16_t            unit;           /* str_id_t, S_NONE = no unit      */
+    const uint16_t     *opts;           /* str_id_t list (MI_LIST)         */
     const menu_t       *sub;
     void              (*action)(void);
     int16_t           (*max_fn)(void);
@@ -56,7 +57,7 @@ typedef struct {
 } menu_item_t;
 
 struct menu {
-    const char         *title;
+    uint16_t            title;          /* str_id_t                        */
     const menu_item_t  *items;
     uint8_t             count;
     void              (*on_enter)(void);
@@ -139,9 +140,9 @@ static int32_t item_max(const menu_item_t *it)
     return it->max_fn != 0 ? it->max_fn() : it->max;
 }
 
-static void fmt_fixed(char *buf, size_t n, int32_t v, uint8_t dec, const char *unit)
+static void fmt_fixed(char *buf, size_t n, int32_t v, uint8_t dec, uint16_t unit)
 {
-    const char *u = unit != 0 ? unit : "";
+    const char *u = tr((str_id_t)unit);
     if (dec == 0U) {
         snprintf(buf, n, "%ld%s", (long)v, u);
     } else {
@@ -172,16 +173,16 @@ static void item_value_str(const menu_item_t *it, char *buf, size_t n)
         snprintf(buf, n, "%s", (const char *)item_ptr(it));
         break;
     case MI_BOOL:
-        snprintf(buf, n, "%s", item_get(it) ? "On" : "Off");
+        snprintf(buf, n, "%s", tr(item_get(it) ? S_ON : S_OFF));
         break;
     case MI_LIST:
         v = item_get(it);
         if (it->fmt_fn != 0) snprintf(buf, n, "%s", it->fmt_fn(v));
-        else                 snprintf(buf, n, "%s", it->opts[v]);
+        else                 snprintf(buf, n, "%s", tr((str_id_t)it->opts[v]));
         break;
     default:
         v = item_get(it);
-        if ((it->flags & MF_ZOFF) && v == 0) snprintf(buf, n, "Off");
+        if ((it->flags & MF_ZOFF) && v == 0) snprintf(buf, n, "%s", tr(S_OFF));
         else if (it->fmt_fn != 0)            snprintf(buf, n, "%s", it->fmt_fn(v));
         else                                 fmt_fixed(buf, n, v, it->dec, it->unit);
         break;
@@ -204,7 +205,7 @@ static const char *tip_name(int32_t v)
 static const char *tip_title(void)
 {
     static char buf[24];
-    snprintf(buf, sizeof(buf), "Tip: %s", settings_tip()->name);
+    snprintf(buf, sizeof(buf), tr(S_TIP_TITLE_FMT), settings_tip()->name);
     return buf;
 }
 
@@ -213,6 +214,11 @@ static const char *fmt_year(int32_t v)
     static char buf[8];
     snprintf(buf, sizeof(buf), "20%02ld", (long)v);
     return buf;
+}
+
+static const char *fmt_lang(int32_t v)
+{
+    return lang_name((uint8_t)v);
 }
 
 static const char *fmt_boost(int32_t v)
@@ -238,7 +244,7 @@ static void do_reset_cal(void)
 
 static void act_reset_cal(void)
 {
-    ui_confirm("Reset calibration?", do_reset_cal);
+    ui_confirm(tr(S_RESET_CAL_Q), do_reset_cal);
 }
 
 static void do_delete_tip(void)
@@ -257,9 +263,9 @@ static void do_delete_tip(void)
 static void act_delete_tip(void)
 {
     if (g_set.tip_count <= 1U) {
-        ui_message("Cannot delete", "the last tip");
+        ui_message(tr(S_CANNOT_DELETE), tr(S_LAST_TIP));
     } else {
-        ui_confirm("Delete this tip?", do_delete_tip);
+        ui_confirm(tr(S_DELETE_TIP_Q), do_delete_tip);
     }
 }
 
@@ -279,7 +285,7 @@ static void act_time_save(void)
     s_time.sec = 0U;
     rtc_set(&s_time);
     menu_pop();
-    ui_message("Time saved", "");
+    ui_message(tr(S_TIME_SAVED), "");
 }
 
 static void act_info(void)
@@ -291,123 +297,125 @@ static void do_factory(void)
 {
     settings_defaults();
     ui_apply_settings();
-    ui_message("Defaults", "loaded");
+    ui_message(tr(S_DEFAULTS), tr(S_LOADED));
 }
 
 static void act_factory(void)
 {
-    ui_confirm("Factory reset?", do_factory);
+    ui_confirm(tr(S_FACTORY_Q), do_factory);
 }
 
 /* ------------------------------------------------------------------------- */
 /* Menu tables (leaves first)                                                */
 /* ------------------------------------------------------------------------- */
-static const char * const s_on_start[] = { "Off", "Heat" };
-static const char * const s_fmt24[]    = { "12h", "24h" };
-static const char * const s_enc_dir[]  = { "Normal", "Reverse" };
+static const uint16_t s_on_start[] = { S_OFF, S_HEAT_OPT };
+static const uint16_t s_fmt24[]    = { S_12H, S_24H };
+static const uint16_t s_enc_dir[]  = { S_NORMAL, S_REVERSE };
 
 /* --- Tip settings (operate on the active tip) --- */
 static const menu_item_t s_tip_items[] = {
-    { .label = "Name", .type = MI_TEXT, .tofs = (uint16_t)offsetof(tip_t, name), .flags = MF_TIP },
-    M_ACT("Calibrate", act_calibrate),
-    M_TIPNUM("PID Kp", MI_U16, kp, 0, 2000, 1, 3, "", MF_ACCEL),
-    M_TIPNUM("PID Ki", MI_U16, ki, 0, 2000, 1, 3, "", MF_ACCEL),
-    M_TIPNUM("PID Kd", MI_U16, kd, 0, 2000, 1, 3, "", MF_ACCEL),
-    M_ACT("Reset calib.", act_reset_cal),
-    M_ACT("Delete tip", act_delete_tip),
-    M_BACK("Back"),
+    { .label = S_NAME, .type = MI_TEXT, .tofs = (uint16_t)offsetof(tip_t, name), .flags = MF_TIP },
+    M_ACT(S_CALIBRATE, act_calibrate),
+    M_TIPNUM(S_PID_KP, MI_U16, kp, 0, 2000, 1, 3, S_NONE, MF_ACCEL),
+    M_TIPNUM(S_PID_KI, MI_U16, ki, 0, 2000, 1, 3, S_NONE, MF_ACCEL),
+    M_TIPNUM(S_PID_KD, MI_U16, kd, 0, 2000, 1, 3, S_NONE, MF_ACCEL),
+    M_ACT(S_RESET_CAL, act_reset_cal),
+    M_ACT(S_DELETE_TIP, act_delete_tip),
+    M_BACK(S_BACK),
 };
-static const menu_t m_tip = MENU("Tip", s_tip_items, 0, tip_title);
+static const menu_t m_tip = MENU(S_TIP, s_tip_items, 0, tip_title);
 
 /* --- Temperatures --- */
 static const menu_item_t s_temp_items[] = {
-    M_NUM("Min temp",   MI_U16, &g_set.temp_min,   TEMP_ABS_MIN, TEMP_ABS_MAX, 5, 0, CH_DEG "C", MF_ACCEL),
-    M_NUM("Max temp",   MI_U16, &g_set.temp_max,   TEMP_ABS_MIN, TEMP_ABS_MAX, 5, 0, CH_DEG "C", MF_ACCEL),
-    M_NUM("Temp step",  MI_U8,  &g_set.temp_step,  1, 25, 1, 0, CH_DEG "C", 0),
-    { .label = "Boost temp", .type = MI_U16, .ptr = &g_set.boost_add, .min = 10, .max = 150,
+    M_NUM(S_MIN_TEMP,   MI_U16, &g_set.temp_min,   TEMP_ABS_MIN, TEMP_ABS_MAX, 5, 0, S_U_DEGC, MF_ACCEL),
+    M_NUM(S_MAX_TEMP,   MI_U16, &g_set.temp_max,   TEMP_ABS_MIN, TEMP_ABS_MAX, 5, 0, S_U_DEGC, MF_ACCEL),
+    M_NUM(S_TEMP_STEP,  MI_U8,  &g_set.temp_step,  1, 25, 1, 0, S_U_DEGC, 0),
+    { .label = S_BOOST_TEMP, .type = MI_U16, .ptr = &g_set.boost_add, .min = 10, .max = 150,
       .step = 5, .fmt_fn = fmt_boost },
-    M_NUM("Boost time", MI_U16, &g_set.boost_time, 10, 600, 10, 0, "s", MF_ACCEL),
-    M_BACK("Back"),
+    M_NUM(S_BOOST_TIME, MI_U16, &g_set.boost_time, 10, 600, 10, 0, S_U_S, MF_ACCEL),
+    M_BACK(S_BACK),
 };
-static const menu_t m_temp = MENU("Temperature", s_temp_items, 0, 0);
+static const menu_t m_temp = MENU(S_TEMPERATURE, s_temp_items, 0, 0);
 
 /* --- Sleep --- */
 static const menu_item_t s_sleep_items[] = {
-    M_BOOL("Motion sensor", &g_set.motion_en),
-    M_NUM("Sleep after",  MI_U8,  &g_set.sleep_time, 0, 60, 1, 0, "min", MF_ZOFF),
-    M_NUM("Sleep temp",   MI_U16, &g_set.sleep_temp, TEMP_ABS_MIN, 300, 10, 0, CH_DEG "C", 0),
-    M_NUM("Off after",    MI_U8,  &g_set.off_time, 0, 120, 1, 0, "min", MF_ZOFF | MF_ACCEL),
-    M_BOOL("Enc. wakes",  &g_set.wake_on_enc),
-    M_LIST("Power on",    &g_set.start_mode, s_on_start),
-    M_BACK("Back"),
+    M_BOOL(S_MOTION,       &g_set.motion_en),
+    M_NUM(S_SLEEP_AFTER,   MI_U8,  &g_set.sleep_time, 0, 60, 1, 0, S_U_MIN, MF_ZOFF),
+    M_NUM(S_SLEEP_TEMP,    MI_U16, &g_set.sleep_temp, TEMP_ABS_MIN, 300, 10, 0, S_U_DEGC, 0),
+    M_NUM(S_OFF_AFTER,     MI_U8,  &g_set.off_time, 0, 120, 1, 0, S_U_MIN, MF_ZOFF | MF_ACCEL),
+    M_BOOL(S_ENC_WAKES,    &g_set.wake_on_enc),
+    M_LIST(S_POWER_ON,     &g_set.start_mode, s_on_start),
+    M_BACK(S_BACK),
 };
-static const menu_t m_sleep = MENU("Sleep", s_sleep_items, 0, 0);
+static const menu_t m_sleep = MENU(S_SLEEP, s_sleep_items, 0, 0);
 
 /* --- Clock: set time --- */
 static const menu_item_t s_time_items[] = {
-    M_NUM("Hours",   MI_U8, &s_time.hour,  0, 23, 1, 0, "", 0),
-    M_NUM("Minutes", MI_U8, &s_time.min,   0, 59, 1, 0, "", MF_ACCEL),
-    M_NUM("Day",     MI_U8, &s_time.day,   1, 31, 1, 0, "", 0),
-    M_NUM("Month",   MI_U8, &s_time.month, 1, 12, 1, 0, "", 0),
-    { .label = "Year", .type = MI_U8, .ptr = &s_time.year, .min = 0, .max = 99, .step = 1,
+    M_NUM(S_HOURS,   MI_U8, &s_time.hour,  0, 23, 1, 0, S_NONE, 0),
+    M_NUM(S_MINUTES, MI_U8, &s_time.min,   0, 59, 1, 0, S_NONE, MF_ACCEL),
+    M_NUM(S_DAY,     MI_U8, &s_time.day,   1, 31, 1, 0, S_NONE, 0),
+    M_NUM(S_MONTH,   MI_U8, &s_time.month, 1, 12, 1, 0, S_NONE, 0),
+    { .label = S_YEAR, .type = MI_U8, .ptr = &s_time.year, .min = 0, .max = 99, .step = 1,
       .fmt_fn = fmt_year },
-    M_ACT("Save", act_time_save),
-    M_BACK("Cancel"),
+    M_ACT(S_SAVE, act_time_save),
+    M_BACK(S_CANCEL),
 };
-static const menu_t m_time = MENU("Set time", s_time_items, time_enter, 0);
+static const menu_t m_time = MENU(S_SET_TIME, s_time_items, time_enter, 0);
 
 /* --- Clock --- */
 static const menu_item_t s_clock_items[] = {
-    M_BOOL("Show clock", &g_set.clock_en),
-    M_LIST("Format",     &g_set.clock_24h, s_fmt24),
-    M_NUM("Clock time",  MI_U8, &g_set.clock_show, 1, 60, 1, 0, "s", 0),
-    M_NUM("Setpt time",  MI_U8, &g_set.set_show,   1, 60, 1, 0, "s", 0),
-    M_SUB("Set time",    m_time),
-    M_BACK("Back"),
+    M_BOOL(S_SHOW_CLOCK,  &g_set.clock_en),
+    M_LIST(S_FORMAT,      &g_set.clock_24h, s_fmt24),
+    M_NUM(S_CLOCK_TIME,   MI_U8, &g_set.clock_show, 1, 60, 1, 0, S_U_S, 0),
+    M_NUM(S_SETPT_TIME,   MI_U8, &g_set.set_show,   1, 60, 1, 0, S_U_S, 0),
+    M_SUB(S_SET_TIME,     m_time),
+    M_BACK(S_BACK),
 };
-static const menu_t m_clock = MENU("Clock", s_clock_items, 0, 0);
+static const menu_t m_clock = MENU(S_CLOCK, s_clock_items, 0, 0);
 
 /* --- Display --- */
 static const menu_item_t s_disp_items[] = {
-    M_NUM("Contrast", MI_U8, &g_set.contrast, 1, 100, 5, 0, "%", 0),
-    M_BOOL("Flip 180" CH_DEG, &g_set.flip),
-    M_BOOL("Dim idle", &g_set.dim_idle),
-    M_BACK("Back"),
+    M_NUM(S_CONTRAST, MI_U8, &g_set.contrast, 1, 100, 5, 0, S_U_PCT, 0),
+    M_BOOL(S_FLIP,     &g_set.flip),
+    M_BOOL(S_DIM_IDLE, &g_set.dim_idle),
+    M_BACK(S_BACK),
 };
-static const menu_t m_disp = MENU("Display", s_disp_items, 0, 0);
+static const menu_t m_disp = MENU(S_DISPLAY, s_disp_items, 0, 0);
 
 /* --- System --- */
 static const menu_item_t s_sys_items[] = {
-    M_NUM("PWM period",  MI_U16, &g_set.pwm_period, 50, 500, 10, 0, "ms", 0),
-    M_NUM("ADC delay",   MI_U8,  &g_set.adc_delay, 5, 200, 1, 1, "ms", MF_ACCEL),
-    M_NUM("Power limit", MI_U16, &g_set.power_limit, 0, 150, 5, 0, "W", MF_ZOFF),
-    M_NUM("Heater R",    MI_U16, &g_set.heater_res, 20, 200, 1, 1, "R", MF_ACCEL),
-    M_NUM("Low voltage", MI_U16, &g_set.low_volt, 0, 300, 1, 1, "V", MF_ZOFF | MF_ACCEL),
-    M_NUM("TC offset",   MI_I16, &g_set.adc_offset, -500, 500, 1, 0, "", MF_ACCEL),
-    M_LIST("Encoder",    &g_set.enc_invert, s_enc_dir),
-    M_ACT("Info", act_info),
-    M_ACT("Factory reset", act_factory),
-    M_BACK("Back"),
+    M_NUM(S_PWM_PERIOD,  MI_U16, &g_set.pwm_period, 50, 500, 10, 0, S_U_MS, 0),
+    M_NUM(S_ADC_DELAY,   MI_U8,  &g_set.adc_delay, 5, 200, 1, 1, S_U_MS, MF_ACCEL),
+    M_NUM(S_POWER_LIMIT, MI_U16, &g_set.power_limit, 0, 150, 5, 0, S_U_W, MF_ZOFF),
+    M_NUM(S_HEATER_R,    MI_U16, &g_set.heater_res, 20, 200, 1, 1, S_U_OHM, MF_ACCEL),
+    M_NUM(S_LOW_VOLT,    MI_U16, &g_set.low_volt, 0, 300, 1, 1, S_U_V, MF_ZOFF | MF_ACCEL),
+    M_NUM(S_TC_OFFSET,   MI_I16, &g_set.adc_offset, -500, 500, 1, 0, S_NONE, MF_ACCEL),
+    M_LIST(S_ENCODER,    &g_set.enc_invert, s_enc_dir),
+    M_ACT(S_INFO,        act_info),
+    M_ACT(S_FACTORY,     act_factory),
+    M_BACK(S_BACK),
 };
-static const menu_t m_sys = MENU("System", s_sys_items, 0, 0);
+static const menu_t m_sys = MENU(S_SYSTEM, s_sys_items, 0, 0);
 
 /* --- Root --- */
 static void act_add_tip(void);
 
 static const menu_item_t s_root_items[] = {
-    { .label = "Tip", .type = MI_LIST, .ptr = &g_set.tip_active, .min = 0,
+    { .label = S_TIP, .type = MI_LIST, .ptr = &g_set.tip_active, .min = 0,
       .max_fn = tip_max, .fmt_fn = tip_name },
-    M_SUB("Tip settings", m_tip),
-    M_ACT("Add new tip",  act_add_tip),
-    M_SUB("Temperature",  m_temp),
-    M_SUB("Sleep",        m_sleep),
-    M_SUB("Clock",        m_clock),
-    M_SUB("Display",      m_disp),
-    M_BOOL("Sound",       &g_set.buzzer),
-    M_SUB("System",       m_sys),
-    M_BACK("Exit"),
+    M_SUB(S_TIP_SETTINGS, m_tip),
+    M_ACT(S_ADD_TIP,      act_add_tip),
+    M_SUB(S_TEMPERATURE,  m_temp),
+    M_SUB(S_SLEEP,        m_sleep),
+    M_SUB(S_CLOCK,        m_clock),
+    M_SUB(S_DISPLAY,      m_disp),
+    M_BOOL(S_SOUND,       &g_set.buzzer),
+    { .label = S_LANGUAGE, .type = MI_LIST, .ptr = &g_set.lang, .min = 0,
+      .max = (int16_t)LANG_COUNT - 1, .fmt_fn = fmt_lang },
+    M_SUB(S_SYSTEM,       m_sys),
+    M_BACK(S_EXIT),
 };
-static const menu_t m_root = MENU("Settings", s_root_items, 0, 0);
+static const menu_t m_root = MENU(S_SETTINGS, s_root_items, 0, 0);
 
 /* ------------------------------------------------------------------------- */
 static void text_edit_begin(char *s)
@@ -431,7 +439,7 @@ static void act_add_tip(void)
     char name[TIP_NAME_LEN + 1];
 
     if (g_set.tip_count >= TIP_MAX) {
-        ui_message("Tip list", "is full");
+        ui_message(tr(S_TIP_LIST), tr(S_IS_FULL));
         return;
     }
     t = &g_set.tips[g_set.tip_count];
@@ -582,7 +590,7 @@ void menu_draw(void)
     gfx_set_mode(GFX_SET);
     gfx_fill(0, 0, OLED_W, 9);
     gfx_set_mode(GFX_CLR);
-    gfx_text(2, 1, m->title_fn != 0 ? m->title_fn() : m->title, &font_small);
+    gfx_text(2, 1, m->title_fn != 0 ? m->title_fn() : tr((str_id_t)m->title), &font_small);
     snprintf(pos, sizeof(pos), "%u/%u", (unsigned)(lv->sel + 1U), (unsigned)m->count);
     gfx_text_right(OLED_W - 2, 1, pos, &font_small);
     gfx_set_mode(GFX_SET);
@@ -594,7 +602,7 @@ void menu_draw(void)
         int vx;
         bool selected = (idx == lv->sel);
 
-        gfx_text(3, y, it->label, &font_small);
+        gfx_text(3, y, tr((str_id_t)it->label), &font_small);
         item_value_str(it, val, sizeof(val));
         vx = gfx_text_right(OLED_W - 5, y, val, &font_small);
 

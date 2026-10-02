@@ -81,7 +81,8 @@ typedef struct {
     int16_t  adc_offset;                /* thermocouple amplifier offset, LSB */
 
     tip_t    tips[TIP_MAX];
-    uint16_t reserved3;
+    uint8_t  lang;                      /* lang_t, UI language                */
+    uint8_t  reserved3;
 
     uint32_t crc;                       /* hardware CRC-32 of all above       */
 } settings_t;

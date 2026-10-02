@@ -38,6 +38,7 @@ public static class ParamCatalog
         new("dim_idle",   GroupDisplay, ParamKind.Bool),
         new("buzzer",     GroupDisplay, ParamKind.Bool),
         new("enc_invert", GroupDisplay, ParamKind.Choice, OptionCount: 2),
+        new("lang",       GroupDisplay, ParamKind.Choice, OptionCount: 2),
 
         new("pwm_period",  GroupSystem, UnitKey: "U.ms", Step: 10),
         new("adc_delay",   GroupSystem, UnitKey: "U.ms", Decimals: 1),

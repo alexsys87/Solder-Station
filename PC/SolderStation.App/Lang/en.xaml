@@ -220,10 +220,12 @@
     <sys:String x:Key="P.heater_res" xml:space="preserve">Heater resistance</sys:String>
     <sys:String x:Key="P.low_volt" xml:space="preserve">Low voltage threshold</sys:String>
     <sys:String x:Key="P.adc_offset" xml:space="preserve">Amplifier zero offset</sys:String>
+    <sys:String x:Key="P.lang" xml:space="preserve">Station menu language</sys:String>
     <sys:String x:Key="H.motion_en" xml:space="preserve">Wake up from sleep when the handle moves</sys:String>
     <sys:String x:Key="H.sleep_time" xml:space="preserve">Without handle movement or encoder use</sys:String>
     <sys:String x:Key="H.clock_en" xml:space="preserve">The clock alternates with the setpoint while the iron is off</sys:String>
     <sys:String x:Key="H.adc_delay" xml:space="preserve">Time from heater off to the ADC start</sys:String>
+    <sys:String x:Key="H.lang" xml:space="preserve">Language of the texts on the station display</sys:String>
     <sys:String x:Key="Z.never" xml:space="preserve">never</sys:String>
     <sys:String x:Key="Z.none" xml:space="preserve">none</sys:String>
     <sys:String x:Key="Z.off" xml:space="preserve">off</sys:String>
@@ -233,6 +235,8 @@
     <sys:String x:Key="O.clock_24h.1" xml:space="preserve">24 h</sys:String>
     <sys:String x:Key="O.enc_invert.0" xml:space="preserve">Normal</sys:String>
     <sys:String x:Key="O.enc_invert.1" xml:space="preserve">Reversed</sys:String>
+    <sys:String x:Key="O.lang.0" xml:space="preserve">English</sys:String>
+    <sys:String x:Key="O.lang.1" xml:space="preserve">Русский</sys:String>
     <sys:String x:Key="U.C" xml:space="preserve">°C</sys:String>
     <sys:String x:Key="U.s" xml:space="preserve">s</sys:String>
     <sys:String x:Key="U.min" xml:space="preserve">min</sys:String>

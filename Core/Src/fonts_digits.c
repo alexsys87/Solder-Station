@@ -53,7 +53,7 @@ static const uint16_t font_mid_offsets[14] = { 0, 26, 52, 78, 104, 130, 156, 182
 
 const font_t font_mid = {
     16U, 2U, 0U, 14U, "0123456789:-. ", 0U,
-    font_mid_widths, font_mid_offsets, font_mid_data
+    font_mid_widths, font_mid_offsets, font_mid_data, 0
 };
 
 static const uint8_t font_big_data[1196] = {
@@ -161,5 +161,5 @@ static const uint16_t font_big_offsets[13] = { 0, 100, 200, 300, 400, 500, 600, 
 
 const font_t font_big = {
     32U, 2U, 0U, 13U, "0123456789:- ", 0U,
-    font_big_widths, font_big_offsets, font_big_data
+    font_big_widths, font_big_offsets, font_big_data, 0
 };

@@ -2246,6 +2246,9 @@
             <name>$PROJ_DIR$\..\Core\Src\flash.c</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\Core\Src\fonts_cyr.c</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\Core\Src\fonts_digits.c</name>
         </file>
         <file>
@@ -2262,6 +2265,9 @@
         </file>
         <file>
             <name>$PROJ_DIR$\..\Core\Src\iron.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Core\Src\lang.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\Core\Src\main.c</name>

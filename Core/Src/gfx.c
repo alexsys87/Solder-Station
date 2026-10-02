@@ -93,8 +93,22 @@ static int glyph_index(char c, const font_t *f)
         }
         return -1;
     }
-    if ((uint8_t)c < f->first || (uint8_t)c >= (uint8_t)(f->first + f->count)) return -1;
-    return (uint8_t)c - f->first;
+    /* unsigned arithmetic: first + count may be 0x100 */
+    if ((unsigned)(uint8_t)c < f->first || (unsigned)(uint8_t)c >= (unsigned)f->first + f->count) return -1;
+    return (int)((uint8_t)c - f->first);
+}
+
+/* Find a glyph in the font or in the fonts chained to it. Unknown codes
+ * fall back to the space of the first font. Returns the font holding it. */
+static const font_t *glyph_find(char c, const font_t *f, int *idx)
+{
+    const font_t *p;
+    for (p = f; p != 0; p = p->next) {
+        *idx = glyph_index(c, p);
+        if (*idx >= 0) return p;
+    }
+    *idx = glyph_index(' ', f);
+    return *idx >= 0 ? f : 0;
 }
 
 static int glyph_width(int idx, const font_t *f)
@@ -111,17 +125,17 @@ static const uint8_t *glyph_data(int idx, const font_t *f)
 
 int gfx_char(int x, int y, char c, const font_t *f)
 {
-    int idx = glyph_index(c, f);
+    int idx;
     int w;
     int col;
     int row;
     int pages = (f->height + 7) / 8;
     const uint8_t *d;
+    const font_t *g = glyph_find(c, f, &idx);
 
-    if (idx < 0) idx = glyph_index(' ', f);
-    if (idx < 0) return x;
-    w = glyph_width(idx, f);
-    d = glyph_data(idx, f);
+    if (g == 0) return x;
+    w = glyph_width(idx, g);
+    d = glyph_data(idx, g);
 
     for (col = 0; col < w; col++) {
         for (row = 0; row < f->height; row++) {
@@ -145,10 +159,10 @@ int gfx_text_width(const char *s, const font_t *f)
 {
     int w = 0;
     int idx;
+    const font_t *g;
     while (*s) {
-        idx = glyph_index(*s++, f);
-        if (idx < 0) idx = glyph_index(' ', f);
-        if (idx >= 0) w += glyph_width(idx, f) + f->spacing;
+        g = glyph_find(*s++, f, &idx);
+        if (g != 0) w += glyph_width(idx, g) + f->spacing;
     }
     return w > 0 ? w - f->spacing : 0;
 }
@@ -169,15 +183,16 @@ int gfx_text_right(int xr, int y, const char *s, const font_t *f)
 int gfx_text2x(int x, int y, const char *s)
 {
     const font_t *f = &font_small;
+    const font_t *g;
     int idx;
     int col;
     int row;
     const uint8_t *d;
 
     while (*s) {
-        idx = glyph_index(*s++, f);
-        if (idx < 0) idx = 0;
-        d = glyph_data(idx, f);
+        g = glyph_find(*s++, f, &idx);
+        if (g == 0) continue;
+        d = glyph_data(idx, g);
         for (col = 0; col < f->fixed_w; col++) {
             for (row = 0; row < 8; row++) {
                 if (d[col] & (1U << row)) {

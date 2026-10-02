@@ -2,7 +2,7 @@
  * Host-side UI simulator: compiles ui.c, menu.c, gfx.c, fonts and settings.c
  * on a PC with stubbed hardware and writes screenshots (PNG via PBM->python).
  *
- *   make -C tools/sim && ./tools/sim/sim out_dir
+ *   make -C tools/sim && ./tools/sim/sim out_dir [lang]     (lang: 0 = en, 1 = ru)
  */
 #include <stdio.h>
 #include <string.h>
@@ -102,6 +102,7 @@ int main(int argc, char **argv)
     if (fl == MAP_FAILED) { perror("mmap"); return 1; }
     memset(fl, 0xFF, 0x8000);
     settings_init();
+    if (argc > 2) g_set.lang = (uint8_t)atoi(argv[2]);
     ui_init();
     shot("00_splash");
     run(1500);
@@ -126,12 +127,19 @@ int main(int argc, char **argv)
     rot(1); click(); shot("15_menu_clock");
     rot(4); click(); shot("16_menu_settime"); hold(); hold();
     rot(1); click(); shot("17_menu_display"); hold();
-    rot(2); click(); shot("18_menu_system");
+    rot(3); click(); shot("18_menu_system");
     rot(7); click(); shot("19_info"); click(); hold();
-    rot(-7); click(); click(); rot(3); shot("20_tip_name_edit");
+    rot(-8); click(); click(); rot(3); shot("20_tip_name_edit");
     click(); rot(-2); shot("21_tip_name_edit2");
     hold();
     rot(1); click(); s_cal_t = 250; s_st.tip_disp = 238; run(100); shot("22_cal_heat");
     click(); rot(4); shot("23_cal_input");
+    hold(); hold(); hold();                 /* calibration -> tip menu -> root -> main */
+    hold(); rot(8); click(); shot("24_menu_language");
+    rot(1); shot("25_menu_language2");
+    rot(1); click(); hold();
+    s_mode = IRON_RUN; s_err = IRON_ERR_LOW_VOLT; run(100); shot("26_err_lowvolt");
+    s_err = IRON_ERR_OVERHEAT; run(100); shot("27_err_overheat");
+    s_err = 0; hold(); rot(1); click(); rot(5); click(); shot("28_confirm");
     return 0;
 }
