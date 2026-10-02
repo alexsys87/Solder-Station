@@ -81,7 +81,7 @@ public sealed partial class StationClient : IDisposable
             try { port.Close(); } catch { /* already gone */ }
             port.Dispose();
         }
-        FailPending("Порт закрыт");
+        FailPending(Loc.T("X.PortClosed"));
     }
 
     public void Dispose() => Close();
@@ -105,7 +105,7 @@ public sealed partial class StationClient : IDisposable
                 if (_running && ReferenceEquals(port, _port))
                 {
                     _running = false;
-                    FailPending("Соединение потеряно");
+                    FailPending(Loc.T("X.Lost"));
                     ConnectionLost?.Invoke(ex.Message);
                 }
                 return;
@@ -166,7 +166,7 @@ public sealed partial class StationClient : IDisposable
         await _commandLock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            var port = _port ?? throw new IOException("Нет подключения");
+            var port = _port ?? throw new IOException(Loc.T("X.NoConnection"));
             var tcs = new TaskCompletionSource<Reply>(TaskCreationOptions.RunContinuationsAsynchronously);
             lock (_sync)
             {
@@ -181,7 +181,7 @@ public sealed partial class StationClient : IDisposable
             }
             catch (Exception ex) when (ex is InvalidOperationException or TimeoutException)
             {
-                throw new IOException("Ошибка записи в порт: " + ex.Message, ex);
+                throw new IOException(Loc.F("X.WriteError", ex.Message), ex);
             }
 
             try
@@ -190,7 +190,7 @@ public sealed partial class StationClient : IDisposable
             }
             catch (TimeoutException)
             {
-                throw new TimeoutException($"Нет ответа на команду «{command}»");
+                throw new TimeoutException(Loc.F("X.NoReply", command));
             }
             finally
             {

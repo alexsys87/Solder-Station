@@ -35,7 +35,7 @@ public static class Dialogs
     {
         var dlg = new SaveFileDialog
         {
-            Filter = "Настройки станции (*.json)|*.json|Все файлы|*.*",
+            Filter = Loc.T("M.JsonFilter"),
             FileName = fileName,
             DefaultExt = ".json",
         };
@@ -46,7 +46,7 @@ public static class Dialogs
     {
         var dlg = new OpenFileDialog
         {
-            Filter = "Настройки станции (*.json)|*.json|Все файлы|*.*",
+            Filter = Loc.T("M.JsonFilter"),
             DefaultExt = ".json",
         };
         if (folder != null) dlg.InitialDirectory = folder;

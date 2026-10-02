@@ -36,12 +36,14 @@ public sealed partial class CalibrationViewModel : ObservableObject
     [ObservableProperty] private bool _isDone;
     [ObservableProperty] private bool _isOk;
     [ObservableProperty] private int _measured;
-    [ObservableProperty] private string _message = "Подготовка…";
+    [ObservableProperty] private string _message = Loc.T("C.Preparing");
 
-    public string StepText => IsDone ? "Готово" : $"Точка {Step + 1} из 3";
+    public string StepText => IsDone ? Loc.T("C.Done") : Loc.F("C.Step", Step + 1);
+    public string TargetText => Loc.F("C.Target", Target);
     public bool CanRecord => IsRunning && !IsDone;
 
     partial void OnStepChanged(int value) => OnPropertyChanged(nameof(StepText));
+    partial void OnTargetChanged(int value) => OnPropertyChanged(nameof(TargetText));
     partial void OnIsDoneChanged(bool value)
     {
         OnPropertyChanged(nameof(StepText));
@@ -55,14 +57,14 @@ public sealed partial class CalibrationViewModel : ObservableObject
         {
             await _client.CalibrationStartAsync();
             IsRunning = true;
-            Message = "Жало нагревается. Дождитесь стабилизации и измерьте температуру термометром.";
+            Message = Loc.T("C.Heating");
             await PollAsync();
             Measured = Target;
             _timer.Start();
         }
         catch (Exception ex)
         {
-            Message = "Не удалось начать калибровку: " + ex.Message;
+            Message = Loc.F("C.StartFailed", ex.Message);
         }
     }
 
@@ -87,19 +89,19 @@ public sealed partial class CalibrationViewModel : ObservableObject
                 IsRunning = false;
                 _timer.Stop();
                 Message = s.Ok
-                    ? "Калибровка записана в профиль жала и сохранена."
-                    : "Калибровка не принята: значения должны возрастать. Повторите.";
+                    ? Loc.T("C.Saved")
+                    : Loc.T("C.Rejected");
             }
             else if (!s.Active && IsRunning)
             {
                 IsRunning = false;
                 _timer.Stop();
-                Message = "Калибровка прервана на станции.";
+                Message = Loc.T("C.Aborted");
             }
         }
         catch (Exception ex)
         {
-            Message = "Ошибка связи: " + ex.Message;
+            Message = Loc.F("C.CommError", ex.Message);
         }
         finally
         {
@@ -112,18 +114,18 @@ public sealed partial class CalibrationViewModel : ObservableObject
     {
         if (Measured < 50 || Measured > 600)
         {
-            Message = "Введите измеренную температуру 50…600 °C";
+            Message = Loc.T("C.Range");
             return;
         }
         try
         {
             await _client.CalibrationPointAsync(Measured);
-            Message = Step < 2 ? "Точка записана, нагрев до следующей…" : "Точка записана";
+            Message = Loc.T(Step < 2 ? "C.PointNext" : "C.PointRecorded");
             await PollAsync();
         }
         catch (Exception ex)
         {
-            Message = "Точка не записана: " + ex.Message;
+            Message = Loc.F("C.PointFailed", ex.Message);
         }
     }
 

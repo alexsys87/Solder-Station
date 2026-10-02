@@ -32,7 +32,7 @@ public sealed partial class MainViewModel
         {
             await _client.SelectTipAsync(value);
             ApplyStatus(await _client.GetStatusAsync());
-            StatusMessage = $"Активное жало: {Tips[value].Name}";
+            StatusMessage = Loc.F("M.ActiveTipSet", Tips[value].Name);
         }, null);
     }
 
@@ -95,8 +95,8 @@ public sealed partial class MainViewModel
         }
         tip.IsDirty = false;
         await LoadTipsAsync();
-        StatusMessage = $"Жало «{data.Name}» сохранено";
-    }, "Запись профиля жала…");
+        StatusMessage = Loc.F("M.TipSaved", data.Name);
+    }, Loc.T("M.TipWriting"));
 
     [RelayCommand(CanExecute = nameof(HasSelectedTip))]
     private Task RevertTip() => RunAsync(async () =>
@@ -117,8 +117,8 @@ public sealed partial class MainViewModel
         int index = await _client.AddTipAsync($"TIP{Tips.Count + 1}");
         await LoadTipsAsync();
         SelectedTip = Tips.ElementAtOrDefault(index);
-        StatusMessage = "Добавлен профиль жала — задайте имя и откалибруйте его";
-    }, "Добавление жала…");
+        StatusMessage = Loc.T("M.TipAdded");
+    }, Loc.T("M.TipAdding"));
 
     [RelayCommand(CanExecute = nameof(HasSelectedTip))]
     private Task DeleteTip()
@@ -127,32 +127,32 @@ public sealed partial class MainViewModel
         if (tip == null) return Task.CompletedTask;
         if (Tips.Count <= 1)
         {
-            Dialogs.Error("Нельзя удалить последний профиль жала");
+            Dialogs.Error(Loc.T("M.TipLast"));
             return Task.CompletedTask;
         }
-        if (!Dialogs.Confirm($"Удалить профиль жала «{tip.Name}»?")) return Task.CompletedTask;
+        if (!Dialogs.Confirm(Loc.F("M.TipDeleteConfirm", tip.Name))) return Task.CompletedTask;
 
         return RunAsync(async () =>
         {
             await _client.DeleteTipAsync(tip.Index);
             SelectedTip = null;
             await LoadTipsAsync();
-            StatusMessage = $"Профиль «{tip.Name}» удалён";
-        }, "Удаление…");
+            StatusMessage = Loc.F("M.TipDeleted", tip.Name);
+        }, Loc.T("M.Deleting"));
     }
 
     [RelayCommand(CanExecute = nameof(HasSelectedTip))]
     private Task ResetTipCalibration()
     {
         var tip = SelectedTip;
-        if (tip == null || !Dialogs.Confirm($"Сбросить калибровку жала «{tip.Name}» к значениям по умолчанию?"))
+        if (tip == null || !Dialogs.Confirm(Loc.F("M.CalResetConfirm", tip.Name)))
             return Task.CompletedTask;
         return RunAsync(async () =>
         {
             await _client.ResetTipCalibrationAsync(tip.Index);
             tip.IsDirty = false;
             await LoadTipsAsync();
-        }, "Сброс калибровки…");
+        }, Loc.T("M.CalResetting"));
     }
 
     [RelayCommand(CanExecute = nameof(HasSelectedTip))]
@@ -160,9 +160,7 @@ public sealed partial class MainViewModel
     {
         var tip = SelectedTip;
         if (tip == null) return;
-        if (!Dialogs.Confirm($"Калибровка жала «{tip.Name}».\n\n" +
-                             "Жало будет нагрето до 250, 350 и 450 °C. Понадобится термометр для жал " +
-                             "(например Hakko FG-100). Продолжить?"))
+        if (!Dialogs.Confirm(Loc.F("M.CalConfirm", tip.Name)))
             return;
 
         await RunAsync(async () =>

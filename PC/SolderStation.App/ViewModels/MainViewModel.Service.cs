@@ -23,7 +23,7 @@ public sealed partial class MainViewModel
     private async Task ReadTimeAsync()
     {
         var t = await _client.GetTimeAsync();
-        DeviceTime = t?.ToString("dd.MM.yyyy HH:mm:ss") ?? "—";
+        DeviceTime = t?.ToString("G", Loc.Culture) ?? "—";
     }
 
     [RelayCommand]
@@ -31,7 +31,7 @@ public sealed partial class MainViewModel
     {
         await _client.SetTimeAsync(DateTime.Now);
         await ReadTimeAsync();
-        StatusMessage = "Часы станции синхронизированы с компьютером";
+        StatusMessage = Loc.T("M.ClockSynced");
     }, null);
 
     // ------------------------------------------------------------------
@@ -44,8 +44,8 @@ public sealed partial class MainViewModel
         var path = Dialogs.SaveJson($"T12_settings_{DateTime.Now:yyyyMMdd_HHmm}.json");
         if (path == null) return;
         SettingsTransfer.SaveToFile(file, path);
-        StatusMessage = $"Настройки экспортированы: {path}";
-    }, "Чтение настроек станции…");
+        StatusMessage = Loc.F("M.Exported", path);
+    }, Loc.T("M.ReadingStation"));
 
     [RelayCommand]
     private Task Import() => ImportFromAsync(null);
@@ -66,25 +66,22 @@ public sealed partial class MainViewModel
         }
         catch (Exception ex)
         {
-            Dialogs.Error("Не удалось прочитать файл: " + ex.Message);
+            Dialogs.Error(Loc.F("M.FileReadError", ex.Message));
             return;
         }
 
         var tips = Dialogs.Ask(
-            $"Файл от {file.Exported:dd.MM.yyyy HH:mm}, прошивка {file.Firmware}.\n" +
-            $"Параметров: {file.Parameters.Count}, профилей жал: {file.Tips.Count}.\n\n" +
-            "Заменить также профили жал (калибровку и PID)?\n" +
-            "Да — параметры и жала, Нет — только параметры.");
+            Loc.F("M.ImportAsk", file.Exported, file.Firmware, file.Parameters.Count, file.Tips.Count));
         if (tips == null) return;
 
         await RunAsync(async () =>
         {
-            var progress = new Progress<string>(s => StatusMessage = "Импорт: " + s);
+            var progress = new Progress<string>(s => StatusMessage = Loc.F("M.ImportProgress", s));
             var warnings = await SettingsTransfer.WriteToDeviceAsync(_client, file, true, tips.Value, progress);
             await ReloadSettingsAsync();
-            StatusMessage = "Импорт завершён, настройки сохранены во флеш";
-            if (warnings.Count > 0) Dialogs.Info("Импорт выполнен с замечаниями:\n\n" + string.Join("\n", warnings));
-        }, "Импорт настроек…");
+            StatusMessage = Loc.T("M.ImportDone");
+            if (warnings.Count > 0) Dialogs.Info(Loc.F("M.ImportWarnings", string.Join("\n", warnings)));
+        }, Loc.T("M.Importing"));
     }
 
     [RelayCommand]
@@ -100,22 +97,18 @@ public sealed partial class MainViewModel
     [RelayCommand]
     private Task RebootDevice()
     {
-        if (!Dialogs.Confirm("Перезагрузить станцию?")) return Task.CompletedTask;
+        if (!Dialogs.Confirm(Loc.T("M.RebootConfirm"))) return Task.CompletedTask;
         return RunAsync(async () =>
         {
             await _client.ResetAsync();
-            StatusMessage = "Станция перезагружается…";
+            StatusMessage = Loc.T("M.Rebooting");
         }, null);
     }
 
     [RelayCommand]
     private Task EnterBootloader()
     {
-        if (!Dialogs.Confirm(
-                "Перевести станцию в режим обновления прошивки?\n\n" +
-                "Станция перезапустится в системный загрузчик STM32 (USB DFU). " +
-                "Прошивку можно записать программой STM32CubeProgrammer (порт USB). " +
-                "Для выхода из загрузчика отключите и снова включите питание."))
+        if (!Dialogs.Confirm(Loc.T("M.DfuConfirm")))
             return Task.CompletedTask;
 
         return RunAsync(async () =>
@@ -124,7 +117,7 @@ public sealed partial class MainViewModel
             await _client.BootloaderAsync();
             _client.Close();
             IsConnected = false;
-            StatusMessage = "Станция в режиме DFU";
+            StatusMessage = Loc.T("M.DfuDone");
         }, null);
     }
 

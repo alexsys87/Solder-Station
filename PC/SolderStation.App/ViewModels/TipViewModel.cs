@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using SolderStation.Models;
+using SolderStation.Services;
 
 namespace SolderStation.ViewModels;
 
@@ -66,14 +67,14 @@ public sealed partial class TipViewModel : ObservableObject
     public string? Validate()
     {
         var d = ToData();
-        if (string.IsNullOrWhiteSpace(d.Name)) return "Имя жала не может быть пустым";
-        if (d.Name.Length > 8) return "Имя жала — не длиннее 8 символов";
+        if (string.IsNullOrWhiteSpace(d.Name)) return Loc.T("V.NameEmpty");
+        if (d.Name.Length > 8) return Loc.T("V.NameLong");
         if (d.Kp is < 0 or > 2000 || d.Ki is < 0 or > 2000 || d.Kd is < 0 or > 2000)
-            return "Коэффициенты PID должны быть в диапазоне 0…2.000";
+            return Loc.T("V.Pid");
         if (!(d.CalAdc[0] < d.CalAdc[1] && d.CalAdc[1] < d.CalAdc[2]))
-            return "Коды АЦП калибровки должны возрастать";
+            return Loc.T("V.Adc");
         if (!(d.CalDt[0] > 0 && d.CalDt[0] < d.CalDt[1] && d.CalDt[1] < d.CalDt[2]))
-            return "ΔT калибровки должны возрастать и быть больше 0";
+            return Loc.T("V.Dt");
         return null;
     }
 

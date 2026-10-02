@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SolderStation.Models;
+using SolderStation.Services;
 
 namespace SolderStation.ViewModels;
 
@@ -36,8 +37,11 @@ public sealed partial class MainViewModel
 
     public ObservableCollection<int> Presets { get; }
 
+    private StationStatus? _lastStatus;
+
     private void ApplyStatus(StationStatus s)
     {
+        _lastStatus = s;
         TipTemp = s.TipTemp;
         Target = s.Target;
         DeviceSetpoint = s.Setpoint;
@@ -55,11 +59,11 @@ public sealed partial class MainViewModel
         IsStable = s.Stable;
         ModeText = s.Mode switch
         {
-            "RUN" => s.Stable ? "Работа · готов" : "Работа · нагрев",
-            "BOOST" => $"Буст · ещё {s.BoostLeft} с",
-            "SLEEP" => "Сон",
-            "CAL" => "Калибровка",
-            _ => s.AutoOff ? "Выключен (автоотключение)" : "Выключен",
+            "RUN" => Loc.T(s.Stable ? "M.ModeRunReady" : "M.ModeRunHeat"),
+            "BOOST" => Loc.F("M.ModeBoost", s.BoostLeft),
+            "SLEEP" => Loc.T("M.ModeSleep"),
+            "CAL" => Loc.T("M.ModeCal"),
+            _ => Loc.T(s.AutoOff ? "M.ModeOffAuto" : "M.ModeOff"),
         };
 
         // follow the encoder unless the user is moving the slider right now

@@ -1,0 +1,245 @@
+<!-- User interface strings (Русский). Every key must exist in both ru.xaml and en.xaml. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+    <sys:String x:Key="S.AppTitle" xml:space="preserve">T12 Station — паяльная станция</sys:String>
+    <sys:String x:Key="S.DarkTheme" xml:space="preserve">Тёмная тема</sys:String>
+    <sys:String x:Key="S.Language" xml:space="preserve">Язык</sys:String>
+    <sys:String x:Key="S.Tip.Port" xml:space="preserve">COM-порт станции (USB или UART)</sys:String>
+    <sys:String x:Key="S.Tip.Refresh" xml:space="preserve">Обновить список портов</sys:String>
+    <sys:String x:Key="S.Tip.Baud" xml:space="preserve">Скорость UART. Для USB-порта значения не имеет</sys:String>
+    <sys:String x:Key="S.Tip.Find" xml:space="preserve">Опросить все порты командой PING</sys:String>
+    <sys:String x:Key="S.Connect" xml:space="preserve">Подключить</sys:String>
+    <sys:String x:Key="S.Disconnect" xml:space="preserve">Отключить</sys:String>
+    <sys:String x:Key="S.FindStation" xml:space="preserve">Найти станцию</sys:String>
+    <sys:String x:Key="S.Firmware" xml:space="preserve">прошивка</sys:String>
+    <sys:String x:Key="S.NoLink" xml:space="preserve">нет связи</sys:String>
+    <sys:String x:Key="S.TipTemperature" xml:space="preserve">Температура жала</sys:String>
+    <sys:String x:Key="S.SetpointShort" xml:space="preserve">Уставка</sys:String>
+    <sys:String x:Key="S.TargetShort" xml:space="preserve">цель</sys:String>
+    <sys:String x:Key="S.Power" xml:space="preserve">Мощность</sys:String>
+    <sys:String x:Key="S.Supply" xml:space="preserve">Питание</sys:String>
+    <sys:String x:Key="S.ColdJunction" xml:space="preserve">Хол. спай</sys:String>
+    <sys:String x:Key="S.Mcu" xml:space="preserve">МК</sys:String>
+    <sys:String x:Key="S.ErrorPrefix" xml:space="preserve">Ошибка:</sys:String>
+    <sys:String x:Key="S.ResetError" xml:space="preserve">Сбросить</sys:String>
+    <sys:String x:Key="S.Mode" xml:space="preserve">Режим</sys:String>
+    <sys:String x:Key="S.ModeOff" xml:space="preserve">Выкл</sys:String>
+    <sys:String x:Key="S.ModeRun" xml:space="preserve">Нагрев</sys:String>
+    <sys:String x:Key="S.ModeBoost" xml:space="preserve">Буст</sys:String>
+    <sys:String x:Key="S.ModeSleep" xml:space="preserve">Сон</sys:String>
+    <sys:String x:Key="S.SetpointTitle" xml:space="preserve">Уставка температуры</sys:String>
+    <sys:String x:Key="S.Presets" xml:space="preserve">Быстрый выбор (правый клик — удалить)</sys:String>
+    <sys:String x:Key="S.RemovePreset" xml:space="preserve">Удалить из быстрого выбора</sys:String>
+    <sys:String x:Key="S.AddPreset" xml:space="preserve">+ Запомнить текущую уставку</sys:String>
+    <sys:String x:Key="S.ActiveTip" xml:space="preserve">Активное жало</sys:String>
+    <sys:String x:Key="S.TabSettings" xml:space="preserve">Настройки</sys:String>
+    <sys:String x:Key="S.TabTips" xml:space="preserve">Жала</sys:String>
+    <sys:String x:Key="S.TabService" xml:space="preserve">Сервис</sys:String>
+    <sys:String x:Key="S.TabConsole" xml:space="preserve">Консоль</sys:String>
+    <sys:String x:Key="S.SaveFlash" xml:space="preserve">Сохранить во флеш</sys:String>
+    <sys:String x:Key="S.Tip.SaveFlash" xml:space="preserve">Изменения применяются сразу и сохраняются станцией автоматически через 4 с. Кнопка сохраняет немедленно</sys:String>
+    <sys:String x:Key="S.Reload" xml:space="preserve">Перечитать</sys:String>
+    <sys:String x:Key="S.Factory" xml:space="preserve">Заводские настройки…</sys:String>
+    <sys:String x:Key="S.TipProfiles" xml:space="preserve">Профили жал</sys:String>
+    <sys:String x:Key="S.Add" xml:space="preserve">Добавить</sys:String>
+    <sys:String x:Key="S.Delete" xml:space="preserve">Удалить</sys:String>
+    <sys:String x:Key="S.Unsaved" xml:space="preserve">Есть несохранённые изменения</sys:String>
+    <sys:String x:Key="S.Profile" xml:space="preserve">Профиль</sys:String>
+    <sys:String x:Key="S.Name" xml:space="preserve">Имя</sys:String>
+    <sys:String x:Key="S.NameHint" xml:space="preserve">до 8 символов: A-Z 0-9 - _ . + / #</sys:String>
+    <sys:String x:Key="S.SetpointC" xml:space="preserve">Уставка, °C</sys:String>
+    <sys:String x:Key="S.KpHint" xml:space="preserve">доля мощности на 1 °C ошибки</sys:String>
+    <sys:String x:Key="S.KiHint" xml:space="preserve">1/(°C·с) — убирает статическую ошибку</sys:String>
+    <sys:String x:Key="S.KdHint" xml:space="preserve">с/°C — гасит перерегулирование</sys:String>
+    <sys:String x:Key="S.Calibration" xml:space="preserve">Калибровка</sys:String>
+    <sys:String x:Key="S.CalHint" xml:space="preserve">Код АЦП термопары и разница «жало − холодный спай» в трёх точках. Обычно заполняется мастером калибровки.</sys:String>
+    <sys:String x:Key="S.Point1" xml:space="preserve">Точка 1</sys:String>
+    <sys:String x:Key="S.Point2" xml:space="preserve">Точка 2</sys:String>
+    <sys:String x:Key="S.Point3" xml:space="preserve">Точка 3</sys:String>
+    <sys:String x:Key="S.AdcCode" xml:space="preserve">Код АЦП</sys:String>
+    <sys:String x:Key="S.WriteTip" xml:space="preserve">Записать в станцию</sys:String>
+    <sys:String x:Key="S.RevertTip" xml:space="preserve">Отменить изменения</sys:String>
+    <sys:String x:Key="S.MakeActive" xml:space="preserve">Сделать активным</sys:String>
+    <sys:String x:Key="S.CalibrateBtn" xml:space="preserve">Калибровка…</sys:String>
+    <sys:String x:Key="S.ResetCal" xml:space="preserve">Сбросить калибровку</sys:String>
+    <sys:String x:Key="S.Clock" xml:space="preserve">Часы станции</sys:String>
+    <sys:String x:Key="S.Read" xml:space="preserve">Прочитать</sys:String>
+    <sys:String x:Key="S.SyncClock" xml:space="preserve">Синхронизировать с компьютером</sys:String>
+    <sys:String x:Key="S.ImportExport" xml:space="preserve">Импорт и экспорт настроек</sys:String>
+    <sys:String x:Key="S.ImportExportHint" xml:space="preserve">Файл JSON со всеми параметрами и профилями жал (калибровка, PID, уставки). Подходит для переноса на другую станцию и резервного копирования.</sys:String>
+    <sys:String x:Key="S.Export" xml:space="preserve">Экспорт в файл…</sys:String>
+    <sys:String x:Key="S.Import" xml:space="preserve">Импорт из файла…</sys:String>
+    <sys:String x:Key="S.RestoreBackup" xml:space="preserve">Восстановить из резервной копии…</sys:String>
+    <sys:String x:Key="S.AutoBackup" xml:space="preserve">Резервная копия при каждом подключении</sys:String>
+    <sys:String x:Key="S.OpenBackups" xml:space="preserve">Открыть папку копий</sys:String>
+    <sys:String x:Key="S.Connection" xml:space="preserve">Подключение</sys:String>
+    <sys:String x:Key="S.AutoReconnect" xml:space="preserve">Переподключаться автоматически при обрыве связи</sys:String>
+    <sys:String x:Key="S.Device" xml:space="preserve">Устройство</sys:String>
+    <sys:String x:Key="S.Beep" xml:space="preserve">Звуковой сигнал</sys:String>
+    <sys:String x:Key="S.Tip.Beep" xml:space="preserve">Помогает найти нужную станцию, если их несколько</sys:String>
+    <sys:String x:Key="S.Reboot" xml:space="preserve">Перезагрузить</sys:String>
+    <sys:String x:Key="S.Dfu" xml:space="preserve">Режим обновления прошивки (DFU)…</sys:String>
+    <sys:String x:Key="S.Clear" xml:space="preserve">Очистить</sys:String>
+    <sys:String x:Key="S.StreamToggle" xml:space="preserve">Поток !S</sys:String>
+    <sys:String x:Key="S.Send" xml:space="preserve">Отправить</sys:String>
+    <sys:String x:Key="S.Tip.Console" xml:space="preserve">Команда протокола, например HELP, STATUS, GET temp_max</sys:String>
+    <sys:String x:Key="S.CalTitle" xml:space="preserve">Калибровка жала</sys:String>
+    <sys:String x:Key="S.TipWord" xml:space="preserve">Жало</sys:String>
+    <sys:String x:Key="S.ByCurrentCal" xml:space="preserve">по текущей калибровке</sys:String>
+    <sys:String x:Key="S.Stabilizing" xml:space="preserve">Стабилизация…</sys:String>
+    <sys:String x:Key="S.Stable" xml:space="preserve">Температура стабильна — можно измерять</sys:String>
+    <sys:String x:Key="S.MeasuredLabel" xml:space="preserve">Температура по термометру, °C</sys:String>
+    <sys:String x:Key="S.Close" xml:space="preserve">Закрыть</sys:String>
+    <sys:String x:Key="S.RecordPoint" xml:space="preserve">Записать точку</sys:String>
+    <sys:String x:Key="M.NotConnected" xml:space="preserve">Не подключено</sys:String>
+    <sys:String x:Key="M.SelectPort" xml:space="preserve">Выберите COM-порт</sys:String>
+    <sys:String x:Key="M.Connecting" xml:space="preserve">Подключение к {0}…</sys:String>
+    <sys:String x:Key="M.Disconnected" xml:space="preserve">Отключено</sys:String>
+    <sys:String x:Key="M.Searching" xml:space="preserve">Поиск: {0}…</sys:String>
+    <sys:String x:Key="M.NotFound" xml:space="preserve">Станция не найдена</sys:String>
+    <sys:String x:Key="M.SearchingStation" xml:space="preserve">Поиск станции…</sys:String>
+    <sys:String x:Key="M.Connected" xml:space="preserve">Подключено: {0}, прошивка {1}</sys:String>
+    <sys:String x:Key="M.BackupSaved" xml:space="preserve"> · резервная копия: {0}</sys:String>
+    <sys:String x:Key="M.ConnectionLost" xml:space="preserve">Соединение потеряно: {0}</sys:String>
+    <sys:String x:Key="M.StationError" xml:space="preserve">Станция ответила ошибкой: {0}</sys:String>
+    <sys:String x:Key="M.Error" xml:space="preserve">Ошибка: {0}</sys:String>
+    <sys:String x:Key="M.Unexpected" xml:space="preserve">Непредвиденная ошибка: {0}</sys:String>
+    <sys:String x:Key="M.ModeRunReady" xml:space="preserve">Работа · готов</sys:String>
+    <sys:String x:Key="M.ModeRunHeat" xml:space="preserve">Работа · нагрев</sys:String>
+    <sys:String x:Key="M.ModeBoost" xml:space="preserve">Буст · ещё {0} с</sys:String>
+    <sys:String x:Key="M.ModeSleep" xml:space="preserve">Сон</sys:String>
+    <sys:String x:Key="M.ModeCal" xml:space="preserve">Калибровка</sys:String>
+    <sys:String x:Key="M.ModeOffAuto" xml:space="preserve">Выключен (автоотключение)</sys:String>
+    <sys:String x:Key="M.ModeOff" xml:space="preserve">Выключен</sys:String>
+    <sys:String x:Key="M.ParamSent" xml:space="preserve">{0}: {1} (сохранится автоматически)</sys:String>
+    <sys:String x:Key="M.ParamError" xml:space="preserve">{0}: {1}</sys:String>
+    <sys:String x:Key="M.Reading" xml:space="preserve">Чтение настроек…</sys:String>
+    <sys:String x:Key="M.SavedFlash" xml:space="preserve">Настройки записаны во флеш станции</sys:String>
+    <sys:String x:Key="M.Saving" xml:space="preserve">Сохранение…</sys:String>
+    <sys:String x:Key="M.ConfirmFactory" xml:space="preserve">Сбросить все настройки и профили жал станции к заводским?&#10;Перед этим будет предложено сохранить резервную копию.</sys:String>
+    <sys:String x:Key="M.FactoryDone" xml:space="preserve">Заводские настройки восстановлены</sys:String>
+    <sys:String x:Key="M.FactoryBusy" xml:space="preserve">Сброс настроек…</sys:String>
+    <sys:String x:Key="M.ActiveTipSet" xml:space="preserve">Активное жало: {0}</sys:String>
+    <sys:String x:Key="M.TipSaved" xml:space="preserve">Жало «{0}» сохранено</sys:String>
+    <sys:String x:Key="M.TipWriting" xml:space="preserve">Запись профиля жала…</sys:String>
+    <sys:String x:Key="M.TipAdded" xml:space="preserve">Добавлен профиль жала — задайте имя и откалибруйте его</sys:String>
+    <sys:String x:Key="M.TipAdding" xml:space="preserve">Добавление жала…</sys:String>
+    <sys:String x:Key="M.TipLast" xml:space="preserve">Нельзя удалить последний профиль жала</sys:String>
+    <sys:String x:Key="M.TipDeleteConfirm" xml:space="preserve">Удалить профиль жала «{0}»?</sys:String>
+    <sys:String x:Key="M.TipDeleted" xml:space="preserve">Профиль «{0}» удалён</sys:String>
+    <sys:String x:Key="M.Deleting" xml:space="preserve">Удаление…</sys:String>
+    <sys:String x:Key="M.CalResetConfirm" xml:space="preserve">Сбросить калибровку жала «{0}» к значениям по умолчанию?</sys:String>
+    <sys:String x:Key="M.CalResetting" xml:space="preserve">Сброс калибровки…</sys:String>
+    <sys:String x:Key="M.CalConfirm" xml:space="preserve">Калибровка жала «{0}».&#10;&#10;Жало будет нагрето до 250, 350 и 450 °C. Понадобится термометр для жал (например Hakko FG-100). Продолжить?</sys:String>
+    <sys:String x:Key="M.ClockSynced" xml:space="preserve">Часы станции синхронизированы с компьютером</sys:String>
+    <sys:String x:Key="M.Exported" xml:space="preserve">Настройки экспортированы: {0}</sys:String>
+    <sys:String x:Key="M.ReadingStation" xml:space="preserve">Чтение настроек станции…</sys:String>
+    <sys:String x:Key="M.FileReadError" xml:space="preserve">Не удалось прочитать файл: {0}</sys:String>
+    <sys:String x:Key="M.ImportAsk" xml:space="preserve">Файл от {0:g}, прошивка {1}.&#10;Параметров: {2}, профилей жал: {3}.&#10;&#10;Заменить также профили жал (калибровку и PID)?&#10;Да — параметры и жала, Нет — только параметры.</sys:String>
+    <sys:String x:Key="M.ImportProgress" xml:space="preserve">Импорт: {0}</sys:String>
+    <sys:String x:Key="M.ImportDone" xml:space="preserve">Импорт завершён, настройки сохранены во флеш</sys:String>
+    <sys:String x:Key="M.ImportWarnings" xml:space="preserve">Импорт выполнен с замечаниями:&#10;&#10;{0}</sys:String>
+    <sys:String x:Key="M.Importing" xml:space="preserve">Импорт настроек…</sys:String>
+    <sys:String x:Key="M.RebootConfirm" xml:space="preserve">Перезагрузить станцию?</sys:String>
+    <sys:String x:Key="M.Rebooting" xml:space="preserve">Станция перезагружается…</sys:String>
+    <sys:String x:Key="M.DfuConfirm" xml:space="preserve">Перевести станцию в режим обновления прошивки?&#10;&#10;Станция перезапустится в системный загрузчик STM32 (USB DFU). Прошивку можно записать программой STM32CubeProgrammer (порт USB). Для выхода из загрузчика отключите и снова включите питание.</sys:String>
+    <sys:String x:Key="M.DfuDone" xml:space="preserve">Станция в режиме DFU</sys:String>
+    <sys:String x:Key="M.JsonFilter" xml:space="preserve">Настройки станции (*.json)|*.json|Все файлы|*.*</sys:String>
+    <sys:String x:Key="M.HintZero" xml:space="preserve">{0}. 0 = {1}</sys:String>
+    <sys:String x:Key="M.ZeroOnly" xml:space="preserve">0 = {0}</sys:String>
+    <sys:String x:Key="E.NoTip" xml:space="preserve">нет жала</sys:String>
+    <sys:String x:Key="E.Overheat" xml:space="preserve">перегрев</sys:String>
+    <sys:String x:Key="E.Runaway" xml:space="preserve">нет роста температуры</sys:String>
+    <sys:String x:Key="E.LowVolt" xml:space="preserve">низкое напряжение</sys:String>
+    <sys:String x:Key="V.NameEmpty" xml:space="preserve">Имя жала не может быть пустым</sys:String>
+    <sys:String x:Key="V.NameLong" xml:space="preserve">Имя жала — не длиннее 8 символов</sys:String>
+    <sys:String x:Key="V.Pid" xml:space="preserve">Коэффициенты PID должны быть в диапазоне 0…2.000</sys:String>
+    <sys:String x:Key="V.Adc" xml:space="preserve">Коды АЦП калибровки должны возрастать</sys:String>
+    <sys:String x:Key="V.Dt" xml:space="preserve">ΔT калибровки должны возрастать и быть больше 0</sys:String>
+    <sys:String x:Key="C.Preparing" xml:space="preserve">Подготовка…</sys:String>
+    <sys:String x:Key="C.Heating" xml:space="preserve">Жало нагревается. Дождитесь стабилизации и измерьте температуру термометром.</sys:String>
+    <sys:String x:Key="C.StartFailed" xml:space="preserve">Не удалось начать калибровку: {0}</sys:String>
+    <sys:String x:Key="C.Done" xml:space="preserve">Готово</sys:String>
+    <sys:String x:Key="C.Step" xml:space="preserve">Точка {0} из 3</sys:String>
+    <sys:String x:Key="C.Saved" xml:space="preserve">Калибровка записана в профиль жала и сохранена.</sys:String>
+    <sys:String x:Key="C.Rejected" xml:space="preserve">Калибровка не принята: значения должны возрастать. Повторите.</sys:String>
+    <sys:String x:Key="C.Aborted" xml:space="preserve">Калибровка прервана на станции.</sys:String>
+    <sys:String x:Key="C.CommError" xml:space="preserve">Ошибка связи: {0}</sys:String>
+    <sys:String x:Key="C.Range" xml:space="preserve">Введите измеренную температуру 50…600 °C</sys:String>
+    <sys:String x:Key="C.PointNext" xml:space="preserve">Точка записана, нагрев до следующей…</sys:String>
+    <sys:String x:Key="C.PointRecorded" xml:space="preserve">Точка записана</sys:String>
+    <sys:String x:Key="C.PointFailed" xml:space="preserve">Точка не записана: {0}</sys:String>
+    <sys:String x:Key="C.Target" xml:space="preserve">цель {0} °C</sys:String>
+    <sys:String x:Key="T.Unsupported" xml:space="preserve">Параметр «{0}» не поддерживается прошивкой — пропущен</sys:String>
+    <sys:String x:Key="T.Clamped" xml:space="preserve">«{0}»: {1} вне диапазона, записано {2}</sys:String>
+    <sys:String x:Key="T.TooManyTips" xml:space="preserve">В файле {0} жал, устройство хранит {1}</sys:String>
+    <sys:String x:Key="T.NoCal" xml:space="preserve">Жало «{0}»: нет калибровки, оставлена по умолчанию</sys:String>
+    <sys:String x:Key="T.Param" xml:space="preserve">Параметр {0} = {1}</sys:String>
+    <sys:String x:Key="T.AddTip" xml:space="preserve">Добавление профиля жала</sys:String>
+    <sys:String x:Key="T.DelTip" xml:space="preserve">Удаление лишнего профиля</sys:String>
+    <sys:String x:Key="T.Tip" xml:space="preserve">Жало {0}: {1}</sys:String>
+    <sys:String x:Key="T.Saving" xml:space="preserve">Сохранение во флеш</sys:String>
+    <sys:String x:Key="T.EmptyFile" xml:space="preserve">Пустой файл</sys:String>
+    <sys:String x:Key="T.NotSettings" xml:space="preserve">Это не файл настроек паяльной станции</sys:String>
+    <sys:String x:Key="X.PortClosed" xml:space="preserve">Порт закрыт</sys:String>
+    <sys:String x:Key="X.Lost" xml:space="preserve">Соединение потеряно</sys:String>
+    <sys:String x:Key="X.NoConnection" xml:space="preserve">Нет подключения</sys:String>
+    <sys:String x:Key="X.WriteError" xml:space="preserve">Ошибка записи в порт: {0}</sys:String>
+    <sys:String x:Key="X.NoReply" xml:space="preserve">Нет ответа на команду «{0}»</sys:String>
+    <sys:String x:Key="X.UnknownDevice" xml:space="preserve">Неизвестное устройство</sys:String>
+    <sys:String x:Key="G.Temp" xml:space="preserve">Температура</sys:String>
+    <sys:String x:Key="G.Sleep" xml:space="preserve">Сон и датчик движения</sys:String>
+    <sys:String x:Key="G.Clock" xml:space="preserve">Часы</sys:String>
+    <sys:String x:Key="G.Display" xml:space="preserve">Дисплей и звук</sys:String>
+    <sys:String x:Key="G.System" xml:space="preserve">Система</sys:String>
+    <sys:String x:Key="G.Other" xml:space="preserve">Прочее</sys:String>
+    <sys:String x:Key="P.temp_min" xml:space="preserve">Минимальная уставка</sys:String>
+    <sys:String x:Key="P.temp_max" xml:space="preserve">Максимальная уставка</sys:String>
+    <sys:String x:Key="P.temp_step" xml:space="preserve">Шаг уставки энкодером</sys:String>
+    <sys:String x:Key="P.boost_add" xml:space="preserve">Добавка в режиме буст</sys:String>
+    <sys:String x:Key="P.boost_time" xml:space="preserve">Длительность буста</sys:String>
+    <sys:String x:Key="P.motion_en" xml:space="preserve">Датчик вибрации</sys:String>
+    <sys:String x:Key="P.sleep_time" xml:space="preserve">Переход в сон через</sys:String>
+    <sys:String x:Key="P.sleep_temp" xml:space="preserve">Температура сна</sys:String>
+    <sys:String x:Key="P.off_time" xml:space="preserve">Выключение после сна через</sys:String>
+    <sys:String x:Key="P.wake_on_enc" xml:space="preserve">Вращение энкодера будит</sys:String>
+    <sys:String x:Key="P.start_mode" xml:space="preserve">При включении питания</sys:String>
+    <sys:String x:Key="P.clock_en" xml:space="preserve">Показывать часы</sys:String>
+    <sys:String x:Key="P.clock_24h" xml:space="preserve">Формат времени</sys:String>
+    <sys:String x:Key="P.clock_show" xml:space="preserve">Показ часов</sys:String>
+    <sys:String x:Key="P.set_show" xml:space="preserve">Показ уставки</sys:String>
+    <sys:String x:Key="P.contrast" xml:space="preserve">Яркость</sys:String>
+    <sys:String x:Key="P.flip" xml:space="preserve">Повернуть экран на 180°</sys:String>
+    <sys:String x:Key="P.dim_idle" xml:space="preserve">Затемнять в простое</sys:String>
+    <sys:String x:Key="P.buzzer" xml:space="preserve">Звук</sys:String>
+    <sys:String x:Key="P.enc_invert" xml:space="preserve">Направление энкодера</sys:String>
+    <sys:String x:Key="P.pwm_period" xml:space="preserve">Период ШИМ / регулятора</sys:String>
+    <sys:String x:Key="P.adc_delay" xml:space="preserve">Пауза перед измерением</sys:String>
+    <sys:String x:Key="P.power_limit" xml:space="preserve">Ограничение мощности</sys:String>
+    <sys:String x:Key="P.heater_res" xml:space="preserve">Сопротивление нагревателя</sys:String>
+    <sys:String x:Key="P.low_volt" xml:space="preserve">Порог низкого напряжения</sys:String>
+    <sys:String x:Key="P.adc_offset" xml:space="preserve">Смещение нуля усилителя</sys:String>
+    <sys:String x:Key="H.motion_en" xml:space="preserve">Пробуждение из сна движением ручки</sys:String>
+    <sys:String x:Key="H.sleep_time" xml:space="preserve">Без движения ручки и действий с энкодером</sys:String>
+    <sys:String x:Key="H.clock_en" xml:space="preserve">Часы чередуются с уставкой, когда паяльник выключен</sys:String>
+    <sys:String x:Key="H.adc_delay" xml:space="preserve">Время от выключения нагревателя до запуска АЦП</sys:String>
+    <sys:String x:Key="Z.never" xml:space="preserve">никогда</sys:String>
+    <sys:String x:Key="Z.none" xml:space="preserve">нет</sys:String>
+    <sys:String x:Key="Z.off" xml:space="preserve">выкл</sys:String>
+    <sys:String x:Key="O.start_mode.0" xml:space="preserve">Выключен</sys:String>
+    <sys:String x:Key="O.start_mode.1" xml:space="preserve">Нагрев</sys:String>
+    <sys:String x:Key="O.clock_24h.0" xml:space="preserve">12 ч</sys:String>
+    <sys:String x:Key="O.clock_24h.1" xml:space="preserve">24 ч</sys:String>
+    <sys:String x:Key="O.enc_invert.0" xml:space="preserve">Обычное</sys:String>
+    <sys:String x:Key="O.enc_invert.1" xml:space="preserve">Обратное</sys:String>
+    <sys:String x:Key="U.C" xml:space="preserve">°C</sys:String>
+    <sys:String x:Key="U.s" xml:space="preserve">с</sys:String>
+    <sys:String x:Key="U.min" xml:space="preserve">мин</sys:String>
+    <sys:String x:Key="U.ms" xml:space="preserve">мс</sys:String>
+    <sys:String x:Key="U.W" xml:space="preserve">Вт</sys:String>
+    <sys:String x:Key="U.V" xml:space="preserve">В</sys:String>
+    <sys:String x:Key="U.Ohm" xml:space="preserve">Ом</sys:String>
+    <sys:String x:Key="U.Pct" xml:space="preserve">%</sys:String>
+    <sys:String x:Key="U.Lsb" xml:space="preserve">ед. АЦП</sys:String>
+</ResourceDictionary>

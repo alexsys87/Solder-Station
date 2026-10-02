@@ -1,4 +1,5 @@
 using System.Globalization;
+using SolderStation.Services;
 
 namespace SolderStation.Models;
 
@@ -58,10 +59,10 @@ public sealed class StationStatus
         {
             if (Errors == 0) return string.Empty;
             var list = new List<string>();
-            if ((Errors & ErrNoTip) != 0) list.Add("нет жала");
-            if ((Errors & ErrOverheat) != 0) list.Add("перегрев");
-            if ((Errors & ErrRunaway) != 0) list.Add("нет роста температуры");
-            if ((Errors & ErrLowVoltage) != 0) list.Add("низкое напряжение");
+            if ((Errors & ErrNoTip) != 0) list.Add(Loc.T("E.NoTip"));
+            if ((Errors & ErrOverheat) != 0) list.Add(Loc.T("E.Overheat"));
+            if ((Errors & ErrRunaway) != 0) list.Add(Loc.T("E.Runaway"));
+            if ((Errors & ErrLowVoltage) != 0) list.Add(Loc.T("E.LowVolt"));
             return string.Join(", ", list);
         }
     }

@@ -2,7 +2,7 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\SolderStation.ewp</path>
+    <path>$WS_DIR$\USB_Audio_DAC.ewp</path>
   </project>
   <batchBuild/>
 </workspace>

@@ -29,7 +29,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 
-#define LINE_MAX        128
+#define PROTO_LINE_MAX  128
 #define OUT_MAX         200
 #define MAX_TOKENS      16
 #define OUT_TIMEOUT_MS  200U
@@ -52,7 +52,7 @@ typedef struct {
     uint32_t (*write)(const void *data, uint32_t len);
     uint32_t (*read)(void *data, uint32_t max);
     bool     (*ready)(void);
-    char     line[LINE_MAX];
+    char     line[PROTO_LINE_MAX];
     uint16_t len;
     bool     overflow;
     uint16_t stream_ms;
@@ -84,8 +84,8 @@ static uint32_t  s_pending_reset;       /* 0 or time of reset        */
 static bool      s_pending_boot;
 
 /* Command line split into tokens */
-static char      s_orig[LINE_MAX];      /* untouched copy             */
-static char      s_work[LINE_MAX];
+static char      s_orig[PROTO_LINE_MAX];      /* untouched copy             */
+static char      s_work[PROTO_LINE_MAX];
 static char     *s_tok[MAX_TOKENS];
 static uint8_t   s_ntok;
 
@@ -682,7 +682,7 @@ static void poll_port(port_t *port)
             } else if (ch == 0x08 || ch == 0x7F) {
                 if (port->len != 0U) port->len--;
             } else if ((uint8_t)ch >= 0x20U) {
-                if (port->len < LINE_MAX - 1U) port->line[port->len++] = ch;
+                if (port->len < PROTO_LINE_MAX - 1U) port->line[port->len++] = ch;
                 else port->overflow = true;
             }
         }
