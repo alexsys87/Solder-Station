@@ -100,6 +100,15 @@
         <Setter Property="Margin" Value="0,0,6,6"/>
     </Style>
 
+    <!-- small +/- step buttons next to a numeric field: narrow padding and a
+         minimum width instead of a fixed one, so "−10" / "+10" always fit -->
+    <Style x:Key="StepButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Setter Property="Padding" Value="6,4"/>
+        <Setter Property="MinWidth" Value="46"/>
+        <Setter Property="Margin" Value="0"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
     <!-- ===== text box ===== -->
     <Style TargetType="TextBox">
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}"/>
@@ -107,7 +116,8 @@
         <Setter Property="BorderBrush" Value="{DynamicResource ControlBorderBrush}"/>
         <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}"/>
         <Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush}"/>
-        <Setter Property="Padding" Value="5,4"/>
+        <Setter Property="Padding" Value="6,3"/>
+        <Setter Property="MinHeight" Value="30"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Setter Property="Template">
             <Setter.Value>

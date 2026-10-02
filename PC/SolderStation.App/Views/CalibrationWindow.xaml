@@ -60,13 +60,13 @@
         <StackPanel IsEnabled="{Binding CanRecord}">
             <TextBlock Text="{DynamicResource S.MeasuredLabel}" Style="{StaticResource Caption}" Margin="0,0,0,4"/>
             <DockPanel Margin="0,0,0,12">
-                <Button DockPanel.Dock="Left" Content="−10" Width="46" Command="{Binding AdjustMeasuredCommand}" CommandParameter="-10"/>
-                <Button DockPanel.Dock="Left" Content="−1" Width="38" Command="{Binding AdjustMeasuredCommand}" CommandParameter="-1"/>
-                <Button DockPanel.Dock="Right" Content="+10" Width="46" Margin="6,0,0,6"
+                <Button DockPanel.Dock="Left" Content="−10" Style="{StaticResource StepButton}" Margin="0,0,4,0" Command="{Binding AdjustMeasuredCommand}" CommandParameter="-10"/>
+                <Button DockPanel.Dock="Left" Content="−1" Style="{StaticResource StepButton}" Margin="0,0,6,0" Command="{Binding AdjustMeasuredCommand}" CommandParameter="-1"/>
+                <Button DockPanel.Dock="Right" Content="+10" Style="{StaticResource StepButton}" Margin="4,0,0,0"
                         Command="{Binding AdjustMeasuredCommand}" CommandParameter="10"/>
-                <Button DockPanel.Dock="Right" Content="+1" Width="38" Margin="6,0,0,6"
+                <Button DockPanel.Dock="Right" Content="+1" Style="{StaticResource StepButton}" Margin="6,0,0,0"
                         Command="{Binding AdjustMeasuredCommand}" CommandParameter="1"/>
-                <TextBox Text="{Binding Measured, UpdateSourceTrigger=PropertyChanged}" FontSize="22" Margin="0,0,0,6"
+                <TextBox Text="{Binding Measured, UpdateSourceTrigger=PropertyChanged}" FontSize="22" Padding="4,0"
                          HorizontalContentAlignment="Center"/>
             </DockPanel>
         </StackPanel>
