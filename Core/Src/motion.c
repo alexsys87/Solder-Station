@@ -7,6 +7,7 @@
  */
 #include "motion.h"
 #include "board.h"
+#include "irq.h"
 #include "sys.h"
 
 #define MOTION_HOLDOFF_MS   20U

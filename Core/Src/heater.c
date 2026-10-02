@@ -4,6 +4,7 @@
  */
 #include "heater.h"
 #include "board.h"
+#include "irq.h"
 #include "sys.h"
 
 #define TIM1_TICK_HZ        10000U      /* 0.1 ms resolution            */

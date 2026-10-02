@@ -26,6 +26,7 @@ MCU  = -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard
 
 CFLAGS  = $(MCU) $(DEFS) $(INCS) -Os -g3 -std=c11 \
           -Wall -Wextra -Wno-unused-parameter -Wshadow \
+          -Wmissing-prototypes -Wstrict-prototypes \
           -ffunction-sections -fdata-sections -fsingle-precision-constant
 LDFLAGS = $(MCU) -specs=nano.specs -specs=nosys.specs -Tgcc/stm32f401xc.ld \
           -Wl,--gc-sections -Wl,-Map=$(BUILD)/$(TARGET).map -Wl,--print-memory-usage -lm
