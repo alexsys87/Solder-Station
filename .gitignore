@@ -1,0 +1,16 @@
+# GCC build
+build/
+
+# IAR EWARM output and user files
+EWARM/Debug/
+EWARM/Release/
+EWARM/settings/
+EWARM/*.dep
+EWARM/*.ewt
+EWARM/*.dni
+*.bak
+
+# Host UI simulator
+tools/sim/sim
+tools/sim/*.pbm
+__pycache__/
