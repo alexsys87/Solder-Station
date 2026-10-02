@@ -16,6 +16,7 @@
  */
 #include "usb_cdc.h"
 #include "board.h"
+#include "irq.h"
 #include "sys.h"
 #include <string.h>
 

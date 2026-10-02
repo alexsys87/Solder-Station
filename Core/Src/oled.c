@@ -10,6 +10,7 @@
  */
 #include "oled.h"
 #include "board.h"
+#include "irq.h"
 #include "config.h"
 #include "sys.h"
 
