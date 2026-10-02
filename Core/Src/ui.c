@@ -66,6 +66,7 @@ static bool     s_cal_ok;
 static int16_t  s_cal_val;
 static uint16_t s_cal_adc[CAL_POINTS];
 static int16_t  s_cal_dt[CAL_POINTS];
+static screen_t s_cal_return;           /* screen to go back to          */
 
 static const char * const s_wday[8] = { "", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
 
@@ -139,6 +140,13 @@ void ui_message(const char *line1, const char *line2)
     set_screen(SCR_MSG);
 }
 
+void ui_show_setpoint(void)
+{
+    uint32_t now = sys_ms();
+    s_set_view_until = now + SETPOINT_VIEW_MS;
+    s_phase_start = now;
+}
+
 void ui_show_info(void)
 {
     set_screen(SCR_INFO);
@@ -146,6 +154,8 @@ void ui_show_info(void)
 
 void ui_start_calibration(void)
 {
+    s_cal_return = (s_scr == SCR_CAL) ? s_cal_return : s_scr;
+    if (s_cal_return != SCR_MENU) s_cal_return = SCR_MAIN;
     s_cal_step  = 0U;
     s_cal_input = false;
     s_cal_ok    = false;
@@ -453,17 +463,36 @@ static void cal_finish(void)
     s_cal_step = CAL_POINTS;
 }
 
-static void cal_input(const input_rot_t *rot, btn_event_t ev)
+/* Store the current point with the real (measured) tip temperature */
+static void cal_record(int measured)
 {
     const iron_status_t *st = iron_status();
 
+    s_cal_adc[s_cal_step] = (uint16_t)iround(st->tip_raw);
+    s_cal_dt[s_cal_step]  = (int16_t)(measured - iround(st->cj_c));
+    s_cal_step++;
+    s_cal_input = false;
+    if (s_cal_step < CAL_POINTS) {
+        iron_set_cal_target(s_cal_targets[s_cal_step]);
+    } else {
+        cal_finish();
+    }
+}
+
+static void cal_exit(void)
+{
+    if (iron_mode() == IRON_CAL) iron_set_mode(IRON_OFF);
+    set_screen(s_cal_return);
+}
+
+static void cal_input(const input_rot_t *rot, btn_event_t ev)
+{
     if (ev == BTN_LONG) {                      /* abort / exit */
-        iron_set_mode(IRON_OFF);
-        set_screen(SCR_MENU);
+        cal_exit();
         return;
     }
     if (s_cal_step >= CAL_POINTS) {
-        if (ev != BTN_NONE) set_screen(SCR_MENU);
+        if (ev != BTN_NONE) cal_exit();
         return;
     }
     if (iron_errors() != 0U) return;
@@ -482,16 +511,37 @@ static void cal_input(const input_rot_t *rot, btn_event_t ev)
     if (s_cal_val > 600) s_cal_val = 600;
 
     if (ev == BTN_CLICK) {
-        s_cal_adc[s_cal_step] = (uint16_t)iround(st->tip_raw);
-        s_cal_dt[s_cal_step]  = (int16_t)(s_cal_val - iround(st->cj_c));
-        s_cal_step++;
-        s_cal_input = false;
-        if (s_cal_step < CAL_POINTS) {
-            iron_set_cal_target(s_cal_targets[s_cal_step]);
-        } else {
-            cal_finish();
-        }
+        cal_record(s_cal_val);
     }
+}
+
+/* ---- remote calibration (protocol) ---- */
+bool ui_cal_active(void)
+{
+    return s_scr == SCR_CAL;
+}
+
+bool ui_cal_point(int measured)
+{
+    if (s_scr != SCR_CAL || s_cal_step >= CAL_POINTS || iron_errors() != 0U) return false;
+    if (measured < 50 || measured > 600) return false;
+    cal_record(measured);
+    return true;
+}
+
+void ui_cal_abort(void)
+{
+    if (s_scr == SCR_CAL) cal_exit();
+}
+
+void ui_cal_state(ui_cal_state_t *cs)
+{
+    cs->active = (s_scr == SCR_CAL);
+    cs->step   = s_cal_step;
+    cs->target = (s_cal_step < CAL_POINTS) ? s_cal_targets[s_cal_step] : 0U;
+    cs->stable = iron_stable(CAL_STABLE_MS);
+    cs->done   = (s_cal_step >= CAL_POINTS);
+    cs->ok     = s_cal_ok;
 }
 
 static void draw_title(const char *title)

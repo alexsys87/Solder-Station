@@ -568,6 +568,9 @@
             <name>$PROJ_DIR$\..\Core\Src\oled.c</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\Core\Src\proto.c</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\Core\Src\rtc.c</name>
         </file>
         <file>
@@ -577,10 +580,13 @@
             <name>$PROJ_DIR$\..\Core\Src\sys.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\Core\Src\telemetry.c</name>
+            <name>$PROJ_DIR$\..\Core\Src\uart.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\Core\Src\ui.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Core\Src\usb_cdc.c</name>
         </file>
     </group>
     <group>
@@ -622,6 +628,9 @@
             <name>$PROJ_DIR$\..\Core\Inc\oled.h</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\Core\Inc\proto.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\Core\Inc\rtc.h</name>
         </file>
         <file>
@@ -631,10 +640,13 @@
             <name>$PROJ_DIR$\..\Core\Inc\sys.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\Core\Inc\telemetry.h</name>
+            <name>$PROJ_DIR$\..\Core\Inc\uart.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\Core\Inc\ui.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\Core\Inc\usb_cdc.h</name>
         </file>
     </group>
     <group>

@@ -11,7 +11,7 @@
 /* ------------------------------------------------------------------------- */
 /* Firmware version                                                          */
 /* ------------------------------------------------------------------------- */
-#define FW_VERSION_STR          "1.0.0"
+#define FW_VERSION_STR          "1.1.0"
 
 /* ------------------------------------------------------------------------- */
 /* Display controller                                                        */
@@ -98,8 +98,11 @@
 #define USE_BUZZER              1   /* passive buzzer on PB4 (TIM3_CH1)      */
 #define BUZZER_FREQ_HZ          2700
 
-#define USE_TELEMETRY           1   /* USART1 TX (PA9) DMA log for PID tuning */
-#define TELEMETRY_BAUD          115200
+#define USE_UART                1   /* USART1 PA9/PA10, same protocol as USB  */
+#define UART_BAUD               115200
+#define UART_STREAM_DEFAULT_MS  0   /* status stream on UART at start, 0=off */
+
+#define USE_USB                 1   /* USB CDC virtual COM port (PA11/PA12)   */
 
 #define USE_WATCHDOG            1   /* IWDG, ~2 s timeout                     */
 
